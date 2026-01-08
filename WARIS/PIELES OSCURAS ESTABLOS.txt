@@ -1,0 +1,341 @@
+;|||||||||||||||||||||||||||||||||| CONFIGURACIÓN ||||||||||||||||||||||||||||||||||||
+
+set %runainicial 1			            ; La primera runa a establo
+set %runacasa 15			            ; Posición de la runa a casa (tiene que ir al final justo después de las runas a establos)
+set %cofre BCXWNOD			            ; Cofre donde dejar las pieles al recalear a casa y recoger regs
+set %librorunas TXZTEQD 		            ; Libro de runas. Todas las runas a establos deben ir seguidas en el libro. La runa a casa debe ir antes o después
+set %mr MZF                         		    ; TYPE mandrake
+set %bm JUF                         		    ; TYPE blood moss
+set %bp KUF                        		    ; TYPE black pearl
+set %comida QQD 			            ; ID de las manzanas, añadir el type de la comida que quieras separándolo del de las manzanas con una barra baja: QQD_AQD_ etc
+set %arma WRH_OMH 			            ; Type del arma a usar para matar las panteras
+set %vendor IS_HS 			            ; Type de los vendor, aunque ya está puesto bien.
+set %maxpeso ( #maxweight - 60 ) 	            ; Máximo de peso en mochila
+set %tiempoespera 600 			            ; Segundos de espera entre ronda y ronda, recomiendo mínimo 600 para asegurar que se repongan
+set %runafinal 14   			            ; Número de la última runa que va a un establo en el libro
+
+;|||||||||||||||||||||||||||||||||| FIN CONFIGURACIÓN ||||||||||||||||||||||||||||||||||||
+
+set #sysmsgcol 1981
+Event SysMessage Pieles oscuras en establos (27/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+set %runaestablo %runainicial
+
+inicio:
+GOSUB RECALESTABLO
+GOSUB VENDOR
+GOSUB PETICIDIO
+GOSUB PIELES
+goto inicio
+
+SUB RECALESTABLO ;------------------------------------------------------------
+if %runaestablo = %runafinal 
+   {
+   set %runaestablo %runainicial
+   for %i %tiempoespera 1
+       {
+       event exmsg #charid 3 6000 %i
+       wait 20
+       }
+   }
+set %runaestablo %runaestablo + 1
+
+if %runaestablo <= 8
+    {
+    set %runax 130
+    set %runay 55 + ( %runaestablo * 15 )
+    }
+if %runaestablo > 8
+    {
+    set %runax 290
+    set %runay 55 + ( ( %runaestablo - 8 ) * 15 )
+    }
+    
+set #lobjectid %librorunas
+gosub checkSave
+event macro 17 0
+event exmsg #charid 3 6000 %runaestablo
+wait 20
+while #mana < 11
+      {
+      wait 1
+      }
+click %runax %runay
+click %runax %runay
+gosub checkSave
+GOSUB WAITRECALL
+GOSUB VENDOR
+
+SUB VENDOR ;-------------------------------------------------
+
+finditem %comida C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+finditem %vendor G_10
+if #findcnt < 1
+{
+gosub recalestablo
+}
+event property #findid
+if #charname in #property
+{
+ignoreitem #findid
+set #findindex #findindex + 1
+GOSUB VENDOR
+}
+gosub GetName #findid nombre_vendor
+gosub checkSave
+move #findx #findy 1 0
+event macro 1 0 %nombre_vendor buy           ; LOS SIGUIENTES CLICK SON LOS DEL MENU DE COMPRA DEL ESTABLERO
+wait 10
+click 400 540
+wait 10
+click 400 540
+wait 10
+click 375 210
+wait 20
+click 600 535
+wait 20
+GOSUB PETICIDIO
+
+SUB PETICIDIO ;----------------------------------------------------
+
+gosub checkSave
+finditem %arma C_ , #charid
+if #findcnt < 1
+{
+finditem %arma C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 10
+}
+event macro 1 0 all stop
+wait 20
+gosub checkSave
+repeat
+{
+finditem YF G_4
+set #ltargetid #findid
+set #ltargetkind 1
+event macro 27 0
+wait 60
+}
+until #findcnt < 1
+GOSUB PIELES
+
+SUB PIELES ; ---------------------------------------------
+
+gosub checkSave
+finditem YFM G_2
+set %cadaver1 #findid
+finditem YFM G_2
+ignoreitem #findid
+set #findindex #findindex + 1
+set %cadaver2 #findid
+finditem YFM G_2
+ignoreitem #findid
+set #findindex #findindex + 1
+set %cadaver3 #findid
+finditem YFM G_2
+ignoreitem #findid
+set #findindex #findindex + 1
+set %cadaver4 #findid
+
+gosub checkSave
+finditem %arma C_ , #charid
+set #lobjectid #findid
+event macro 17 0
+target
+set #ltargetid %cadaver1
+set #ltargetkind 1
+event macro 22 0
+wait 10
+set #lobjectid %cadaver1
+event macro 17 0
+wait 20
+finditem MSG C_ , %cadaver1
+exevent drag #findid #findstack
+wait 10
+exevent dropc #backpackid
+wait 15
+
+gosub checkSave
+finditem %arma C_ , #charid
+set #lobjectid #findid
+event macro 17 0
+target
+set #ltargetid %cadaver2
+set #ltargetkind 1
+event macro 22 0
+wait 10
+set #lobjectid %cadaver2
+event macro 17 0
+wait 20
+finditem MSG C_ , %cadaver2
+exevent drag #findid #findstack
+wait 10
+exevent dropc #backpackid
+wait 15
+
+gosub checkSave
+finditem %arma C_ , #charid
+set #lobjectid #findid
+event macro 17 0
+target
+set #ltargetid %cadaver3
+set #ltargetkind 1
+event macro 22 0
+wait 10
+set #lobjectid %cadaver3
+event macro 17 0
+wait 20
+finditem MSG C_ , %cadaver3
+exevent drag #findid #findstack
+wait 10
+exevent dropc #backpackid
+wait 15
+
+gosub checkSave
+finditem %arma C_ , #charid
+set #lobjectid #findid
+event macro 17 0
+target
+set #ltargetid %cadaver4
+set #ltargetkind 1
+event macro 22 0
+wait 10
+set #lobjectid %cadaver4
+event macro 17 0
+wait 20
+finditem MSG C_ , %cadaver4
+exevent drag #findid #findstack
+wait 10
+exevent dropc #backpackid
+wait 15
+
+GOSUB COMPRUEBAPESO
+
+GOSUB RECALESTABLO
+
+SUB RECALCASA  ; ----------------------------------------------------------
+
+gosub checkSave
+
+if %runacasa <= 8
+    {
+    set %runax 130
+    set %runay 55 + ( %runacasa * 15 )
+    }
+if %runacasa > 8
+    {
+    set %runax 290
+    set %runay 55 + ( ( %runacasa - 8 ) * 15 )
+    }
+
+set #lobjectid %librorunas
+event macro 17 0
+wait 10
+while #mana < 11
+      {
+      wait 1
+      }
+click %runacasax %runacasay
+gosub waitrecall
+finditem MSG C_ , #backpackid
+exevent drag #findid #findstack
+wait 10
+exevent dropc %cofre
+finditem %cofre G_2
+set #lobjectid #findid
+event macro 17 0
+wait 5
+gosub checkSave
+finditem %mr C_ , #backpackid
+set  %restanteMR 30 - #findcnt
+finditem %bp C_ , #backpackid
+set %restanteBP 30 - #findcnt
+finditem %bm C_ , #backpackid
+set %restanteBM 30 - #findcnt
+finditem %mr C_ , %cofre
+exevent drag #findid %restanteMR - #findstack
+wait 10
+exevent dropc #backpackid
+wait 20
+finditem %bp C_ , %cofre
+exevent drag #findid %restanteBP - #findstack
+wait 10
+exevent dropc #backpackid
+wait 20
+finditem %bm C_ , %cofre
+exevent drag #findid %restanteBM - #findstack
+wait 10
+exevent dropc #backpackid
+wait 20
+GOSUB RECALESTABLO
+
+SUB COMPRUEBAPESO ; ---------------------------------------------------------
+
+if #weight > %maxpeso
+{
+gosub RECALCASA
+}
+return
+
+SUB GetName ; -----------------------------------------------------
+        set %id_property %1
+        gosub waitforprop %id_property
+        str pos #property $
+        set !strlength #strres - 1
+        str left #property !strlength
+        set % . %2 #strres
+return % . %2
+
+
+sub waitforprop
+event property #charid
+wait 1
+set %oldprop #property
+event property %1
+_testforprop:
+if #property = %oldprop
+   {
+     goto _testforprop
+   }
+return
+
+;--------------------------------------------------------------------------------------------------------
+sub checkSave ;-------------------------- SAVE AUTOMÁTICOS ----------------------------------------------
+if #time > 510 && #time < 559 || #time > 13510 && #time < 13559 || #time > 30510 && #time < 30559 || #time > 43510 && #time < 43559 || #time > 60510 && #time < 60559 || #time > 73510 && #time < 73559 || #time > 90510 && #time < 90559 || #time > 103510 && #time < 103559 || #time > 120510 && #time < 120559 || #time > 133510 && #time < 133559 || #time > 150510 && #time < 150559 || #time > 163510 && #time < 163559 || #time > 180510 && #time < 180559 || #time > 193510 && #time < 193559 || #time > 210510 && #time < 210559 || #time > 223510 && #time < 223559
+   {
+   event exmsg #charid 3 6000 [PAUSA: SAVE]
+   wait 90s
+   event exmsg #charid 3 6000 [REANUDANDO]
+   }
+return
+
+;--------------------------------------------------------------------------------------------------------
+sub waitrecall ;-------------------- ESPERA Y CONFIRMACIÓN DE RECALL ------------------------------------
+set %prevposx #charposx
+set %prevposy #charposy
+set %espera #scnt + 15
+checking:
+if #charposx <> %prevposx || #charposy <> %prevposy
+      {
+      return
+      }
+if #scnt > %espera
+      {
+      set #lobjectid %librorunas
+      event macro 17 0
+      wait 10
+      click %runax %runay
+      click %runax %runay
+      set %espera #scnt + 15
+      }
+goto checking
+
+
+

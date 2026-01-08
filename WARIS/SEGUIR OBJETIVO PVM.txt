@@ -1,0 +1,27 @@
+set %hotkey h ctrl         ; HOTKEY PARA ACTIVAR LA MACRO
+
+set #sysmsgcol 1981
+Event SysMessage Hotkey autofollow (27/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+inicio:
+onhotkey %hotkey
+{
+ for %bucle 50000 1
+ {
+ onhotkey %hotkey
+    {
+    break
+    } 
+ finditem #ltargetid
+ if #findcnt < 1
+    {
+    break
+    }
+ move #findx #findy 1
+ }
+}
+goto inicio
+

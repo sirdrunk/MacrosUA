@@ -1,0 +1,42 @@
+set %hotkey F7      ; tecla en la que mostrar el nº de cadáveres contabilizados
+set %reset F4 alt   ; tecla en la que resetear el contador global (cuidado)
+
+set #sysmsgcol 1981
+Event SysMessage Contador de cadáveres en PVM (20/04/2024)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+
+set %cuenta 0
+
+scan:
+
+finditem YFM G_
+if #findcnt > 0 && #findid notin *contabilizados
+{
+set *contabilizados *contabilizados , _ , #findid
+set *cuenta *cuenta + 1
+set %cuenta %cuenta + 1
+}
+if #findcnt > 0 && #findid in *contabilizados
+{
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+onhotkey %hotkey
+{
+event exmsg #charid 3 6000 Ronda: %cuenta 
+event exmsg #charid 3 6000 Total: *cuenta
+}
+onhotkey %reset
+{
+set *contabilizados 0
+set *cuenta 0
+halt
+}
+goto scan
+
+
+
+

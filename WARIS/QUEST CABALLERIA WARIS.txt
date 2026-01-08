@@ -1,0 +1,324 @@
+set #sysmsgcol 1981
+Event SysMessage Quest de caballeria (14/06/2024)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+if #ar < 30
+{
+display Lo siento, llevas muy poca armadura. Seguramente mueras en el intento.
+halt
+}
+display La macro va a comenzar. Intenta que no coincida con ningún save automático o morirás.
+set %cmsg
+event macro 32 0
+set %fmsg
+for %i %cmsg %fmsg
+{
+scanjournal %i
+if off in #journal
+{
+event macro 32 0
+}
+}
+;----------------------------------- LABERINTO PRIMERO (.KILL) -----------------------
+move 5159 1479 0 0
+move 5159 1474 0 0
+move 5158 1474 0 0
+move 5157 1473 0 0
+move 5156 1473 0 0
+move 5156 1474 0 0
+move 5153 1474 0 0
+move 5153 1473 0 0
+move 5152 1472 0 0
+move 5153 1471 0 0
+move 5157 1467 0 0
+move 5155 1465 0 0
+move 5155 1464 0 0
+event macro 5 3
+event macro 5 3
+event macro 5 3
+event macro 5 3
+event macro 5 3
+event macro 5 3
+event macro 5 3
+gosub labsegundo
+;------------------------------------- LABERINTO SEGUNDO (VENENO Y .KILL) ------------------
+sub labsegundo
+display yesno ¿Quieres pasar el segundo laberinto?
+if #dispres = no
+{
+display Pausa la macro y dale al play cuando estés preparad. Tienes 5 segundos.
+wait 5s
+gosub labsegundo
+}
+if #dispres = yes
+{
+display Cuando la macro termine el laberinto, asegúrate de haberte curado del todo.
+}
+move 5174 1460 0 0
+move 5177 1463 0 0
+move 5182 1463 0 0
+move 5182 1455 0 0
+move 5180 1455 0 0
+move 5180 1453 0 0
+move 5178 1453 0 0
+move 5178 1450 0 0
+move 5189 1450 0 0
+move 5189 1446 0 0
+move 5185 1446 0 0
+move 5185 1444 0 0
+move 5185 1443 0 0
+move 5186 1443 0 0
+move 5186 1442 0 0
+move 5189 1442 0 0
+move 5189 1443 0 0
+move 5191 1443 0 0
+move 5191 1440 0 0
+move 5197 1440 0 0
+if #hits < #maxhits
+{
+gosub curarse
+}
+; ---------------------------- CAMINO AL LABERINTO TERCERO (ESQUELETOS) ------------------
+display Ahora la macro se teleportará y te llevará a una sala con baldosas que meten 50 de daño. Así que cuidado. La idea es que pauses la macro y mates con arco a la gárgola y luego vuelvas a darle al play. Tu pj te avisará y esperará 5s a que pauses.
+event macro 5 3
+event macro 5 3
+move 5207 1440 0 0
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event macro 5 5
+event exmsg #charid 3 6000 Pausa la macro.
+wait 5s
+if #hits < #maxhits
+{
+gosub curarse
+}
+move 5204 1456 0 0
+gosub curarse
+gosub labtercero
+; ---------------------------- LABERINTO TERCERO (ESQUELETOS) ------------------
+sub labtercero
+display yesno ¿Quieres pasar el tercer laberinto?
+if #dispres = no
+{
+display Pausa la macro y dale al play cuando estés preparado. Tienes 5 segundos.
+wait 5s
+gosub labtercero
+}
+if #dispres = yes
+{
+display Vas a atravesar un laberinto lleno de esqueletos y otros npc. Te recomiendo atravesarlo entero, y continuar con la macro para no perder tiempo.
+}
+move 5204 1463 0 0
+move 5203 1463 0 0
+if #hits < #maxhits
+{
+gosub curarse
+}
+move 5202 1463 0 0
+move 5201 1467 0 0
+move 5200 1467 0 0
+move 5200 1473 0 0
+move 5198 1473 0 0
+move 5198 1467 0 0
+move 5195 1467 0 0
+move 5195 1472 0 0
+move 5194 1472 0 0
+move 5194 1471 0 0
+move 5192 1471 0 0
+move 5192 1472 0 0
+move 5188 1472 0 0
+move 5188 1473 0 0
+move 5187 1473 0 0
+move 5186 1473 0 0
+move 5186 1484 0 0
+move 5188 1484 0 0
+move 5188 1486 0 0
+move 5190 1486 0 0
+move 5190 1488 0 0
+move 5184 1488 0 0
+move 5184 1495 0 0
+display Ahora voy a abrir el pilar y tienes que responder a las preguntas tal como te voy indicando. IMPORTANTE: Tienes 7s para cada respuesta.
+finditem SNF G_
+set #lobjectid #findid
+event macro 17 0
+display Primera respuesta: Glaurung.
+wait 7s
+display Segunda respuesta: 15.
+wait 7s
+display Tercera respuesta: Edades de las Lamparas.
+wait 7s
+display Cuarta respuesta: Demonios sin cuerpo, muertos vivientes.
+wait 7s
+set %posx #charposx
+display Quinta respuesta: 3320 de la Segunda Edad.
+repeat
+wait
+until #charposx <> %posx
+event exmsg #charid 3 6000 Nos vamos a por el cuarto laberinto.
+move 5219 1475 0 0
+move 5229 1465 0 0
+move 5233 1465 0 0
+move 5244 1465 0 0
+move 5244 1501 0 0
+gosub labcuarto
+; ---------------------------- LABERINTO CUARTO (CIELO ESTRELLADO .KILL) ------------------
+sub labcuarto
+display yesno ¿Quieres pasar el cuarto laberinto?
+if #dispres = no
+{
+display Pausa la macro y dale al play cuando estés preparado. Tienes 5 segundos.
+wait 5s
+gosub labcuarto
+}
+if #dispres = yes
+{
+display Cuando la macro termine el laberinto, se teleportará moverá al inicio del siguiente.
+}
+move 5239 1501 0 0
+move 5237 1501 0 0
+move 5236 1502 0 0
+move 5235 1502 0 0
+move 5234 1503 0 0
+move 5231 1503 0 0
+move 5230 1502 0 0
+move 5229 1501 0 0
+move 5229 1500 0 0
+move 5231 1500 0 0
+move 5231 1496 0 0
+move 5228 1496 0 0
+move 5227 1497 0 0
+move 5227 1498 0 0
+move 5227 1499 0 0
+move 5226 1500 0 0
+move 5225 1499 0 0
+move 5224 1498 0 0
+event macro 5 5
+event macro 5 5
+; ---------------------------- CAMINO AL QUINTO LABERINTO (ESCORPIÓN, VENENO, .KILL) ------------------
+move 5254 1497 0 0
+EVENT MACRO 5 1
+EVENT MACRO 5 1
+gosub labquinto
+; ---------------------------- QUINTO LABERINTO (ESCORPIÓN, VENENO, .KILL) ------------------
+sub labquinto
+display yesno ¿Quieres pasar el quinto laberinto?
+if #dispres = no
+{
+display Pausa la macro y dale al play cuando estés preparado. Tienes 5 segundos.
+wait 5s
+gosub labquinto
+}
+if #dispres = yes
+{
+display Cuando la macro termine el laberinto, recorrerá una sala hasta la siguiente prueba.
+}
+move 5256 1476 0 0
+move 5263 1476 0 0
+move 5263 1471 0 0
+move 5261 1471 0 0
+move 5261 1465 0 0
+move 5265 1465 0 0
+move 5265 1471 0 0
+move 5277 1471 0 0
+move 5278 1471 0 0
+move 5278 1469 0 0
+move 5274 1469 0 0
+move 5272 1469 0 0
+move 5272 1467 0 0
+move 5271 1467 0 0
+move 5271 1466 0 0
+move 5269 1466 0 0
+move 5269 1464 0 0
+move 5273 1464 0 0
+move 5273 1461 0 0
+gosub curarse
+move 5275 1461 0 0
+move 5274 1460 0 0
+move 5274 1458 0 0
+move 5277 1458 0 0
+move 5277 1459 0 0
+move 5279 1459 0 0
+move 5279 1457 0 0
+move 5281 1457 0 0
+move 5281 1459 0 0
+move 5283 1459 0 0
+move 5283 1456 0 0
+move 5285 1456 0 0
+move 5285 1460 0 0
+move 5284 1460 0 0
+move 5284 1463 0 0
+move 5288 1463 0 0
+move 5288 1462 0 0
+move 5294 1462 0 0
+move 5294 1458 0 0
+move 5293 1458 0 0
+move 5293 1456 0 0
+event macro 5 7  ; TELEPORT A LA CASCADA DEL ÚLTIMO PILAR
+event macro 5 7
+move 5302 1442 0 0
+move 5314 1442 0 0
+move 5318 1441 0 0
+move 5319 1441 0 0
+event macro 5 1
+wait 30
+move 5268 1432 0 0
+move 5268 1438 0 0
+move 5266 1440 0 0
+;--------------------------------------- ÚLTIMO PILAR --------------------------------------------
+display Lo mismo que en el pilar de preguntas de antes. Ve respondiendo lo indicado. Tienes 7s por respuesta.
+finditem SNF G_
+set #lobjectid #findid
+event macro 17 0
+display Primera respuesta: Ondinas.
+wait 7s
+display Segunda respuesta: Ra Arus.
+wait 7s
+display Primera respuesta: Dama del Lago.
+wait 7s
+display Tercera respuesta: Luthien.
+wait 7s
+set %posx #charposx
+display Cuarta respuesta: Caliope y del rey Aquelao.
+repeat
+wait 7s
+display Ok el cofre sobre el que te encuentras es un banco. Debes equiparte para tu duelo contra Nimruh. La macro te deja en la última sala. Páusala ahora mismo. Tienes 5s. Dale al play cuando estés equipado.
+wait 5s
+move 5272 1441 0 0
+move 5274 1441 0 0
+move 5274 1443 0 0
+move 5262 1443 0 0
+move 5260 1441 0 0
+event macro 5 1
+event macro 5 1 ; teleport final
+display genial, ahora ya el final es cosa tuya, porque las arañas son imprevisibles. Te voy a curar y acercar un poco.
+gosub curarse
+move 5247 1436 0 0
+move 5218 1436 0 0
+display en la esquina superior izquierda de la sala, que ahora mismo no ves, hay una palanca, al activarla se abrirá un puente temporal con el cual atravesar la piscina de ácido que te quedará a la derecha. Mucho cuidado con las telarañas. Doble clic a la palanca y atraviesa el ácido lo antes posible. Después no hay peligro. Deberás decir las palabras "Nimruh duelo" a un NPC llamado Nimruh. Al decírsela dos veces, aparecerás en el ring contra Sir Seft. Te recomiendo Doparte y prepararte antes del duelo, pues Seft no te dejará apenas margen de reacción.
+event exmsg #charid 3 6000 A por ello!
+halt
+sub curarse ; ------------------------ SUB DE CURACIÓN ----------------------
+repeat
+{
+event macro 1 0 .vendas
+target
+event macro 23 0
+wait 22s
+}
+until #hits = #maxhits
+return
+
+
+

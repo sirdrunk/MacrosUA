@@ -1,0 +1,32 @@
+set %hotkey ESC ; tecla para comprobar cuántos segundos te quedan
+set %tiempo 600 ; en segundos
+set %end ( #scnt + %tiempo )
+set %color 1096
+
+set #sysmsgcol 1981
+Event SysMessage The Final Countdown (12/12/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+loop:
+set %restante ( %end - #scnt )
+if %restante < 30
+   {
+   set %color 1560
+   }
+onhotkey %hotkey
+         {
+         if %restante > 0
+            {
+            event exmsg #charid 3 %color Faltan %restante segundos
+            wait 5
+            }
+          if %restante < 1
+            {
+            set %sobrante ( ( %restante - %restante ) - %restante )
+            event exmsg #charid 3 %color Sobran %sobrante segundos
+            wait 5
+            }
+         }
+goto loop

@@ -1,0 +1,35 @@
+set #sysmsgcol 1981
+Event SysMessage All Kill a enemigos cercanos (13/12/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+set %rango 10 ; Tiles de distancia a los que rastrea enemigos
+set %spam 15  ; Cada cuántos segundos repetir el All Kill a un mismo enemigo (por si acaso pierde target)
+
+;---------------------- NO TOCAR ------------------------------
+set %decay 0
+set %actual 0
+loop:
+finditem * G_ , %rango
+for %i #findcnt 1
+    {
+    if #findrep = 6 && #scnt > %decay
+       {
+       set #ltargetkind 1
+       set #ltargetid #findid
+       event macro 1 0 all kill
+       target
+       event macro 22 0
+       set %actual #findid
+       set %decay #scnt + %spam
+       }
+    else
+       {
+       ignoreitem #findid
+       set #findindex #findindex + 1
+       }
+    }
+ignoreitem reset
+goto loop
+;--------------------------------------------------------------

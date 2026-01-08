@@ -1,0 +1,1001 @@
+; Stock Manager v1.2 (28/07/2025)
+;---------------------------- SOLO CONFIGURAR ESTE APARTADO ---------------------------------------
+set %imagepath F:\UA\DISPENSAMENAS\      ; Ruta de windows con todas las imágenes. No puede haber espacios en el nombre de la ruta.
+set %cofre BCXWNOD                       ; ID del cofre con todos los lingotes y menas
+set %alertaQ 1000                         ; Límite bajo el cual te sale en rojo el numerito (cantidad de mineral)
+;-------------------------------- IMAGENES DEL CUADRO ------------------------------------
+set %deed TVH
+set %menas DWJ_EWJ_GWJ_TVJ
+Set %lingotes RMK_XMK_TMK_NMK
+set %menas1 menas1.bmp
+set %menas2 menas2.bmp
+set %menas3 menas3.bmp
+set %menas4 menas4.bmp
+set %lingotes1 lingotes1.bmp
+set %lingotes2 lingotes2.bmp
+set %lingotes3 lingotes3.bmp
+set %lingotes4 lingotes4.bmp
+set %maxdrag ( ( ( #maxweight * 3 ) - #weight ) / 2 )
+set %maxcarry ( ( #maxweight - #weight - 1 ) / 2 )
+set %acumulado 0
+
+set #lpc 200
+set %modoMenas #true
+
+set #sysmsgcol 1981
+Event SysMessage Stock Manager Mineral (27/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+ignoreitem reset
+gosub start
+sub start
+set %acumulado 0
+set #menubutton Close
+set %menastotales 0
+
+set %qhierro 0
+set %qoxidado 0
+set %qviejo 0
+set %qpesado 0
+set %qcobre 0
+set %qbronce 0
+set %qplata 0
+set %qoro 0
+set %qacero 0
+set %qsombra 0
+set %qmythril 0
+set %qrosa 0
+set %qagapite 0
+set %qverite 0
+set %qvalorite 0
+set %qrocasangre 0
+set %qrocanegra 0
+set %qaqua 0
+set %qcristalino 0
+set %qnieve 0
+set %qlitium 0
+set %qadamantium 0
+set %qsky 0
+set %qkriptonita 0
+set %qvolcan 0
+set %qlunar 0
+set %qacido 0
+set %qhielo 0
+set %qtitan 0
+set %qdragon 0
+set %qeclipse 0
+
+ignoreitem reset
+if %modoMenas = #true
+{
+set %evathia #false
+gosub scan %menas
+}
+if %modoMenas = #false
+{
+set %evathia #true
+gosub scan %lingotes
+}
+
+
+;------------------- ESCÁNER DE DATOS-----------------------------
+
+sub scan
+
+finditem %1 C_ , %cofre
+for %i #findcnt 1
+    {
+    finditem %1 C_ , %cofre
+    if #findcol = 0 && #findtype = DWJ
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qhierro #findstack
+       set %hierroCol 0
+       }
+    if #findcol = 0 && #findtype = RMK
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qhierro #findstack
+       set %hierroCol 0
+       }
+    if #findcol = 1872
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qoxidado #findstack
+       set %oxidadoCol 1872
+       }
+    if #findcol = 1424
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qviejo #findstack
+       set %viejoCol 1424
+       }
+    if #findcol = 1546
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qpesado #findstack
+       set %pesadoCol 1546
+       }
+    if #findcol = 1601
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qcobre #findstack
+       set %cobreCol 1601
+       }
+    if #findcol = 0 && #findtype = NMK
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qcobre #findstack
+       set %cobreCol 0
+       }
+    if #findcol = 1750
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qbronce #findstack
+       set %bronceCol 1750
+       }
+    if #findcol = 1154
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qplata #findstack
+       set %plataCol 1154
+       }
+    if #findcol = 0 && #findtype = XMK
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qplata #findstack
+       set %plataCol 0
+       }
+    if #findcol = 1118
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qoro #findstack
+       set %oroCol 1118
+       }
+    if #findcol = 0 && #findtype = TMK
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qoro #findstack
+       set %oroCol 0
+       }
+    if #findcol = 901
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qacero #findstack
+       set %aceroCol 901
+       }
+    if #findcol = 1904
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qsombra #findstack
+       set %sombraCol 1904
+       }
+    if #findcol = 1325
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qmythril #findstack
+       set %mythrilCol 1325
+       }
+    if #findcol = 1637
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qrosa #findstack
+       set %rosaCol 1637
+       }
+    if #findcol = 1024
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qagapite #findstack
+       set %agapiteCol 1024
+       }
+    if #findcol = 2001
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qverite #findstack
+       set %veriteCol 2001
+       }
+    if #findcol = 1301
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qvalorite #findstack
+       set %valoriteCol 1301
+       }
+    if #findcol = 1218
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qrocasangre #findstack
+       set %rocasangreCol 1218
+       }
+    if #findcol = 1109
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qrocanegra #findstack
+       set %rocanegraCol 1109
+       }
+    if #findcol = 10
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qaqua #findstack
+       set %aguaCol 10
+       }
+    if #findcol = 101
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qcristalino #findstack
+       set %cristalinoCol 101
+       }
+    if #findcol = 1153
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qnieve #findstack
+       set %nieveCol 1153
+       }
+    if #findcol = 622
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qlitium #findstack
+       set %litiumCol 622
+       }
+    if #findcol = 39
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qadamantium #findstack
+       set %adamantiumCol 39
+       }
+    if #findcol = 91
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qsky #findstack
+       set %skyCol 91
+       }
+    if #findcol = 1926
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qkriptonita #findstack
+       set %kriptonitaCol 1926
+       }
+    if #findcol = 1925
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qvolcan #findstack
+       set %volcanCol 1925
+       }
+    if #findcol = 53
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qlunar #findstack
+       set %lunarCol 53
+       }
+    if #findcol = 1927
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qacido #findstack
+       set %acidoCol 1927
+       }
+    if #findcol = 1152
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qhielo #findstack
+       set %hieloCol 1152
+       }
+    if #findcol = 1944
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qtitan #findstack
+       set %titanCol 1944
+       }
+    if #findcol = 1941
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qdragon #findstack
+       set %dragonCol 1941
+       }
+    if #findcol = 1953
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qeclipse #findstack
+       set %eclipseCol 1953
+       }
+    if #findcol = 43
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qevathia #findstack
+       set %evathiaCol 43
+       }
+    if #findcol = 553
+       {
+       set %qarena #findstack
+       set %arenaCol 553
+       }
+    if #findcol = 1973
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qsuboscuridad #findstack
+       set %suboscuridadCol 1973
+       }
+    if #findcol = 1995
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qiridio #findstack
+       set %iridioCol 1995
+       }
+    if #findcol = 1255
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qobsidiana #findstack
+       set %obsidianaCol 1255
+       }
+    if #findcol = 2969
+       {
+       set %menastotales ( %menastotales + #findstack )
+       set %qsolaris #findstack
+       set %solarisCol 2969
+       }
+    ignoreitem #findid
+    set #findindex #findindex + 1
+    }
+ignoreitem reset
+
+if %modoMenas = #true
+{
+gosub menas
+}
+if %modoMenas = #false
+{
+gosub lingotes
+}
+
+;------------------------------------- CUADROS -------------------------------------------------
+
+sub menas
+
+menu clear
+
+gosub crearImg menas1 25 %menas1
+gosub crearImg menas2 125 %menas2
+gosub crearImg menas3 225 %menas3
+gosub crearImg menas4 325 %menas4
+
+menu font transparent #true
+menu show 1435 22
+menu window size 482 490
+menu window title Stock Manager by Waris Ahluwalia
+menu window color black
+menu font name Arial
+menu font align center
+menu font bgcolor blue
+menu font color white
+menu font style b
+menu button titmenas 0 0 500 25 DISPENSADOR DE MINERAL
+menu font bgcolor btnface
+menu font style
+menu font color white
+menu font size 12
+menu font align center
+menu text Opciones 0 420 --------------------------------------- OPCIONES ---------------------------------------
+menu font color black
+menu font size 10
+menu edit Cantidad 70 450 50
+menu font color white
+menu text TextoCantidad 10 453 Cantidad:
+menu font name Arial
+menu font align center
+menu font bgcolor red
+menu button Deed 150 450 50 22 Deed
+menu button Fundir 219 450 50 22 Fundir
+menu button Mover 287 450 50 22 Mover
+menu font size 7
+menu font bgcolor blue
+menu button Switch 360 450 100 22 MODO LINGOTES
+menu font size 10
+menu font style b
+menu font bgcolor 001080
+menu button titotal 310 360 160 25 Total: %menastotales
+menu font style
+menu font size 8
+
+gosub stacks
+
+sub lingotes
+
+menu clear
+
+gosub crearImg lingotes1 25 %lingotes1
+gosub crearImg lingotes2 125 %lingotes2
+gosub crearImg lingotes3 225 %lingotes3
+gosub crearImg lingotes4 325 %lingotes4
+
+menu font transparent #true
+menu show 1435 22
+menu window size 482 490
+menu window title Stock Manager v1.0 by Waris Ahluwalia
+menu window color black
+menu font name Arial
+menu font align center
+menu font bgcolor blue
+menu font color white
+menu font style b
+menu button titmenas 0 0 500 25 DISPENSADOR DE MINERAL
+menu font bgcolor btnface
+menu font style
+menu font color white
+menu font size 12
+menu font align center
+menu text Opciones 0 420 --------------------------------------- OPCIONES ---------------------------------------
+menu font color black
+menu font size 10
+menu edit Cantidad 70 450 50
+menu font color white
+menu text TextoCantidad 10 453 Cantidad:
+menu font name Arial
+menu font align center
+menu font bgcolor red
+menu button Deed 150 450 50 22 Deed
+menu font bgcolor gray
+menu button Fundir 219 450 50 22 Fundir
+menu font bgcolor red
+menu button Mover 287 450 50 22 Mover
+menu font size 7
+menu font bgcolor blue
+menu button Switch 360 450 100 22 MODO MENAS
+menu font size 10
+menu font style b
+menu font bgcolor 001080
+menu button titotal 350 360 120 25 Total: %menastotales
+menu font style
+menu font size 8
+
+gosub stacks
+
+sub stacks
+
+gosub creardata Hierro %qhierro 20 65 10 80 12 100 Hierroc        ; X (check) Y (check) X (nombre) Y (nombre) X (q) Y (q)
+gosub creardata Oxidado %qoxidado 70 65 55 80 62 100 Oxidadoc
+gosub creardata Viejo %qviejo 118 65 112 80 107 100 Viejoc
+gosub creardata Pesado %qpesado 165 65 152 80 157 100 Pesadoc
+gosub creardata Cobre %qcobre 215 65 205 80 206 100 Cobrec
+gosub creardata Bronce %qbronce 262 65 248 80 252 100 Broncec
+gosub creardata Plata %qplata 310 65 305 80 300 100 Platac
+gosub creardata Oro %qoro 360 65 357 80 350 100 Oroc
+gosub creardata Acero %qacero 405 65 395 80 397 100 Aceroc
+gosub creardata Sombra %qsombra 455 65 440 80 445 100 Sombrac
+gosub creardata Mythril %qmythril 20 165 8 180 10 200 Mythrilc
+gosub creardata Rosa %qrosa 70 165 62 180 62 200 Rosac
+gosub creardata Agapite %qagapite 118 165 105 180 107 200 Agapitec
+gosub creardata Verite %qverite 165 165 155 180 157 200 Veritec
+gosub creardata Valorite %qvalorite 212 165 200 180 206 200 Valoritec
+gosub creardata RSangre %qrocasangre 260 165 245 180 253 200 Rocasangrec
+gosub creardata RNegra %qrocanegra 310 165 298 180 300 200 Rocanegrac
+gosub creardata Aqua %qaqua 356 165 350 180 352 200 Aquac
+gosub creardata Cristalino %qcristalino 402 165 388 180 395 200 Cristalinoc
+gosub creardata Nieve %qnieve 452 165 445 180 442 200 Nievec
+gosub creardata Litium %qlitium 20 265 10 280 10 300 Litiumc
+gosub creardata Adamantium %qadamantium 70 265 47 280 60 300 Adamantiumc
+gosub creardata Sky %qsky 118 265 115 280 110 300 Skyc
+gosub creardata Kripto %qkriptonita 165 265 157 280 155 300 Kriptonitac
+gosub creardata Volcán %qvolcan 215 265 204 280 208 300 Volcanc
+gosub creardata Lunar %qlunar 262 265 254 280 255 300 Lunarc
+gosub creardata Ácido %qacido 310 265 301 280 300 300 Acidoc
+gosub creardata Hielo %qhielo 355 265 350 280 350 300 Hieloc
+gosub creardata Titán %qtitan 405 265 397 280 398 300 Titanc
+gosub creardata Dragón %qdragon 452 265 442 280 442 300 Dragonc
+gosub creardata Eclipse %qeclipse 20 365 8 380 10 400 Eclipsec
+gosub creardata Subosc. %qsuboscuridad 70 365 53 380 60 400 Suboscuridadc
+gosub creardata Iridio %qiridio 118 365 110 380 110 400 Iridioc
+gosub creardata Obsidiana %qobsidiana 165 365 147 380 155 400 Obsidianac
+gosub creardata Solaris %qsolaris 215 365 202 380 208 400 Solarisc
+gosub creardata Arena %qarena 262 365 254 380 257 400 Arenac
+if %evathia = #true
+{
+gosub creardata Evathia %qevathia 310 365 301 380 304 400 Evathiac
+}
+
+
+gosub esperaAccion
+
+
+sub esperaAccion ;--------------- ESPERAMOS CHECK ----------------------
+
+ignoreitem reset
+
+loopCheck:
+
+gosub check Hierroc %hierroCol hierro RMK
+gosub check Oxidadoc %oxidadoCol mineral , #spc , oxidado RMK
+gosub check Viejoc %viejoCol cobre , #spc , viejo RMK
+gosub check Pesadoc %pesadoCol cobre , #spc , pesado RMK
+gosub check Cobrec %cobreCol cobre NMK
+gosub check Broncec %bronceCol bronce RMK
+gosub check Platac %plataCol plata XMK
+gosub check Oroc %oroCol oro TMK
+gosub check Aceroc %aceroCol acero RMK
+gosub check Sombrac %sombraCol sombra RMK
+gosub check Mythrilc %mythrilCol mythril RMK
+gosub check Rosac %rosaCol rosa RMK
+gosub check Agapitec %agapiteCol agapite RMK
+gosub check Veritec %veriteCol verite RMK
+gosub check Valoritec %valoriteCol valorite RMK
+gosub check Rocasangrec %rocasangreCol roca , #spc , de , #spc , sangre RMK
+gosub check Rocanegrac %rocanegraCol roca , #spc , negra RMK
+gosub check Aquac %aquaCol aqua RMK
+gosub check Cristalinoc %cristalinoCol cristalino RMK
+gosub check Nievec %nieveCol nieve RMK
+gosub check Litiumc %litiumCol lithium RMK
+gosub check Adamantiumc %adamantiumCol adamantium RMK
+gosub check Skyc %skyCol sky RMK
+gosub check Kriptonitac %kriptonitaCol kriptonita RMK
+gosub check Volcanc %volcanCol volcán RMK
+gosub check Lunarc %lunarCol lunar RMK
+gosub check Acidoc %acidoCol ácido RMK
+gosub check Hieloc %hieloCol hielo RMK
+gosub check Titanc %titanCol titán RMK
+gosub check Dragonc %dragonCol dragón RMK
+
+goto loopCheck
+
+sub check  ; -------------------- COMPROBANTE DEL CHECK ------------------
+menu get %1
+if #menures <> 0
+{
+set %type %4
+set %menaColor %2
+set %mineral %3
+    if %modoMenas = #true
+    {
+    set %que menas
+    }
+    if %modoMenas = #false
+    {
+    set %que lingotes
+    }
+gosub operacion
+}
+if #menubutton = Switch && %modoMenas = #true
+{
+set %modoMenas #false
+set #menubutton nothing
+gosub start
+}
+if #menubutton = Switch && %modoMenas = #false
+{
+set %modoMenas #true
+set #menubutton nothing
+gosub start
+}
+return
+
+sub operacion
+set #menubutton nothing
+
+loopOp:
+
+if #menubutton = Deed
+{
+menu getNum Cantidad
+set %cantidad #menures
+gosub discriminacion %menaColor %cantidad
+}
+if #menubutton = Fundir && %modoMenas = #false
+{
+goto loopOp
+}
+if #menubutton = Fundir && %modoMenas = #true
+{
+menu getNum Cantidad
+set %cantidad #menures
+gosub discriminacion
+}
+
+if #menubutton = Mover
+{
+menu getNum Cantidad
+set %cantidad #menures
+gosub mover
+}
+if #menubutton = Switch && %modoMenas = #true
+{
+set %modoMenas #false
+set #menubutton nothing
+gosub start
+}
+if #menubutton = Switch && %modoMenas = #false
+{
+set %modoMenas #true
+set #menubutton nothing
+gosub start
+}
+
+goto loopOp
+
+sub discriminacion ;------- DISCRIMINACIÓN POR MATERIALES Y BOTONES -------------
+if %modoMenas = #true
+   {
+   set %material %menas
+   }
+if %modoMenas = #false
+   {
+   set %material %type
+   }
+ignoreitem reset
+if #menubutton = Deed
+{
+ finditem %deed C_ , #backpackid
+ if #findcnt < 1 || #findcol <> 436
+   {
+    display No tienes deed de comodidad en la mochila
+    gosub start
+   }
+ display yesno Se va a hacer un deed de %cantidad %que de %mineral
+}
+if #menubutton = Mover
+{
+ display yesno Vamos a mover %cantidad %que de %mineral a %bolsadestino
+}
+if #menubutton = Fundir
+{
+ display yesno Vamos a fundir %cantidad %que de %mineral
+}
+if #dispres = no
+{
+gosub start
+}
+finditem %material C_ , %cofre
+for %i 5000 1
+{
+ finditem %material C_ , %cofre
+ if #findcol = %menaColor && #findstack = %cantidad && #menubutton = Deed
+    {
+     set %target #findid
+     gosub hacerDeed
+    }
+ if #findcol = %menaColor && #menubutton = Mover && %cantidad < %maxdrag
+    {
+     exevent drag #findid %cantidad - #findstack
+     wait 5
+     exevent dropc %bolsadestino
+     wait 15
+     gosub start
+    }
+ if #findcol = %menaColor && #menubutton = Fundir && %cantidad < %maxcarry
+    {
+     if %acumulado >= %cantidad
+     {
+     gosub start
+     }
+     exevent drag #findid %cantidad - #findstack
+     wait 5
+     exevent dropc #backpackid
+     wait 15
+     gosub fundir
+    }
+   if #findcol = %menaColor && #menubutton = Fundir && ( %acumulado + %maxcarry ) > %cantidad
+     {
+     gosub restante
+     if %acumulado >= %cantidad
+     {
+     gosub start
+     }
+     }
+   if #findcol = %menaColor && #menubutton = Fundir && %cantidad >= %maxcarry
+    {
+     if %acumulado >= %cantidad
+     {
+     gosub start
+     }
+     exevent drag #findid %maxcarry - #findstack
+     wait 5
+     exevent dropc #backpackid
+     wait 15
+     gosub fundir
+    }
+  if #findcol = %menaColor && #menubutton = Mover && %cantidad > %maxdrag
+    {
+    gosub dragmove
+    }
+ if #findcol = %menaColor && #findstack < %cantidad && #menubutton = Deed
+    {
+     display No hay %que suficientes
+     gosub start
+    }
+ if #findcol = %menaColor && #findstack > %cantidad && #menubutton = Deed
+    {
+     set %sobrante ( #findstack - %cantidad )
+     gosub separar
+    }
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+gosub start
+
+sub separar
+if %sobrante >= %maxdrag
+{
+set %drags ( %sobrante / %maxdrag )
+set %batch ( %drags * %maxdrag )
+set %resto ( %sobrante - %batch )
+}
+if %sobrante < %maxdrag
+{
+gosub restar
+}
+
+set %vueltas 0
+for %i 5000 1
+{
+ finditem %material C_ , %cofre
+ if #findstack <> %maxdrag && #findcol = %menaColor
+    {
+    exevent drag #findid %maxdrag - %findstack
+    wait 5
+    exevent dropc %cofre 80 80
+    wait 15
+    set %vueltas ( %vueltas + 1 )
+    }
+ if #findstack = %maxdrag
+    {
+    ignoreitem #findid
+    set #findindex #findindex + 1
+    }
+ if %vueltas = %drags
+    {
+    break
+    }
+ else
+    {
+    ignoreitem #findid
+    set #findindex #findindex + 1
+    }
+}
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+finditem %material C_ , %cofre
+ if #findstack <> %maxdrag
+    {
+    exevent drag #findid %resto - %findstack
+    wait 5
+    exevent dropc %cofre 80 80
+    wait 15
+    break
+    }
+ if #findstack = %maxdrag
+    {
+    ignoreitem #findid
+    }
+}
+finditem %deed C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+target
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+finditem %material C_ , %cofre
+if #findstack = %cantidad
+{
+set #ltargetkind 1
+set #ltargetid #findid
+event macro 22 0
+wait 15
+break
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+ignoreitem reset
+event exmsg #charid 3 6000 Espera, que vuelvo a juntar los stacks de %mineral
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+finditem %material C_ , %cofre
+if #findcol = %menaColor && #findstack = %maxdrag || #findcol = %menaColor && #findstack = %resto
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 20
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+gosub start
+
+sub restar ; --------- RESTAR: SI EL SOBRANTE SE PUEDE DRAGEAR DE UNA VEZ ---------------
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+finditem %material C_ , %cofre
+if #findcol = %menaColor
+{
+exevent drag #findid %sobrante - #findstack
+wait 5
+exevent dropc %cofre 80 80
+wait 20
+break
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+finditem %material C_ , %cofre
+if #findcol = %menaColor && #findstack <> %sobrante
+{
+set %target #findid
+gosub hacerDeed
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+display Error
+halt
+
+sub hacerDeed ;------------- CREA EL DEED --------------------------------
+finditem %deed C_ , #backpackid
+for %i #findcnt 1
+{
+finditem %deed C_ , #backpackid
+if #findcol = 436
+{
+set #lobjectid #findid
+event macro 17 0
+target
+finditem %target C_ , %cofre
+set #ltargetkind 1
+set #ltargetid #findid
+event macro 22 0
+wait 15
+break
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+ignoreitem reset
+event exmsg #charid 3 6000 Espera, que vuelvo a juntar los stacks de %mineral
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+ finditem %material C_ , %cofre
+ if #findcol = %menaColor
+ {
+ exevent drag #findid #findstack
+ wait 5
+ exevent dropc %cofre
+ wait 15
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+gosub start
+display Error
+halt
+
+sub mover ; --------------------------- MOVER ----------------------
+display Selecciona la bolsa de destino
+set #targcurs 1
+repeat
+wait 1
+until #targcurs = 0
+set %bolsadestino #ltargetid
+gosub discriminacion
+
+sub dragmove ; --------- DRAG A BOLSADESTINO HASTA COMPLETAR CIFRA ------------
+set %drags ( %cantidad / %maxdrag )
+set %batch ( %maxdrag * %drags )
+set %faltante ( %cantidad - %batch )
+set %count 0
+for %i 5000 1
+{
+ finditem %material C_ , %cofre
+ if #findcol = %menaColor
+ {
+  exevent drag #findid %maxdrag - #findstack
+  wait 5
+  exevent dropc %bolsadestino
+  wait 15
+  set %count ( %count + %maxdrag )
+ }
+ if %count = %batch
+ {
+  break
+ }
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+finditem %material C_ , %cofre
+for %i #findcnt 1
+{
+ finditem %material C_ , %cofre
+ if #findcol = %menaColor
+ {
+  exevent drag #findid %faltante - #findstack
+  wait 5
+  exevent dropc %bolsadestino
+  wait 15
+  break
+ }
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+set #menubutton nothing
+gosub start
+
+sub fundir  ; --------------------------- FUNDIR ----------------------
+finditem %menas C_ , #backpackid
+set #lobjectid #findid
+repeat
+{
+ finditem %menas C_ , #backpackid
+ event macro 17 0
+}
+until #findcnt < 1
+finditem %lingotes C_ , #backpackid
+set %exito #findstack
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+set %acumulado ( %acumulado + %exito )
+return
+
+sub restante
+set %restante ( %cantidad - %acumulado )
+if %restante < 1
+{
+gosub start
+}
+finditem %menas C_ , %cofre
+for %i #findcnt 1
+{
+ finditem %menas C_ , %cofre
+ if #findcol = %menaColor
+ {
+  exevent drag #findid %restante - #findstack
+  wait 5
+  exevent dropc #backpackid
+  wait 15
+  break
+ }
+ ignoreitem #findid
+ set #findindex #findindex + 1
+}
+finditem %menas C_ , #backpackid
+set #lobjectid #findid
+repeat
+{
+ finditem %menas C_ , #backpackid
+ event macro 17 0
+}
+until #findcnt < 1
+finditem %lingotes C_ , #backpackid
+set %exito #findstack
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+set %acumulado ( %acumulado + %exito )
+return
+
+
+sub creardata ; ------------ Lectura y creación de valores de cantidad -----------
+menu check %9 %3 %4 10 10 #false
+menu font align center
+menu text %1 %5 %6 %1
+if %2 < %alertaQ
+{
+menu font color red
+}
+menu font align center
+menu text %1 %7 %8 %2
+menu font color white
+return
+
+
+sub crearImg ; --------------------------- Carga de imágenes ----------------------
+menu image create %1 0 %2 500 38
+menu image file %1 0 0 %imagepath , %3
+return
+

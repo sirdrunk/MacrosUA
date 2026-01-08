@@ -1,0 +1,474 @@
+; Para esta macro es necesario jugar con una bolsa extra que llamo "bolsa de apoyo" dentro de la mochila, donde dejará ordenados tus regs, pergas y potis.
+; Si no quieres hacer esto, selecciona tu propia mochila cuando la macro te pregunte
+
+
+set #sysmsgcol 1981
+Event SysMessage Reponedor PVP (04/09/2024)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+set #targcurs 1
+display Selecciona tu "bolsa de apoyo" en la mochila
+repeat
+wait
+until #targcurs = 0
+set %bolsadeapoyo #ltargetid
+
+;-------------------------------- CONFIGURA LO QUE INDICO -----------------------------------
+
+nextcpos 750 340
+set %cofre TNUTFND              ; ID DEL COFRE CON LOS REGS, FRASCOS, ETC.
+set %bolsaregs HLVJRND          ; Bolsa con los stacks de regs ; <------------ Regs de nigro y mago dentro de una bolsa dentro del cofre (IMPORTANTE)
+set #lobjectid %cofre
+event macro 17 0
+wait 10
+set #lobjectid %bolsaregs
+event macro 17 0
+wait 10
+
+event macro 9 7
+set #lobjectid #backpackid
+nextcpos 1150 340               ; posición donde quieras tu mochila abierta en pantalla
+event macro 17 0
+wait 10
+set #lobjectid %bolsadeapoyo
+nextcpos 1180 550               ; posición donde quieras la bolsa de apoyo en tu pantalla
+event macro 17 0
+
+; ---------------------------------  CONFIGURA LAS IDS BÁSICAS -----------------------
+
+set %bolsacajitas EAGHQPD       ; ID DE LA BOLSA LLENA DE CAJITAS TRAMPA
+set %sintrampa ITPLRPD          ; ID DE LA BOLSA DONDE DEJAR LAS CAJITAS QUE SE VAYAN USANDO SIN TRAMPA
+
+set %pj1 XXXXXX                  ; Mal de Amores
+set %pj2 XXXXXX                  ; Waris
+set %pj3 XXXXXX                  ; Ese
+set %pj4 XXXXXX                  ; PK
+; ---------------------------------  CONFIGURA LAS CANTIDADES (POR PJ) ----------------------
+
+if %pj1 in #charid      ;    <----------------------- PJ 1
+{
+set %qvida 10         ; potis de vida
+set %qstam 4         ; potis de stam
+set %qdex 0          ; potis de dex
+set %qstr 5          ; potis de fuerza
+set %qmana 0          ; potis de maná
+set %qinvis 3        ; potis de invis
+set %qintel 4         ; potis de intel
+
+set %qmandrake 90      ; mandrake
+set %qblackpearl 90    ; black pearl
+set %qmusgo 90         ; blood moss
+set %qnight 50         ; nightsade
+set %qajo 80           ; garlic
+set %qash 75           ; sulfurus ash
+set %qsilk 75         ; spiders silk
+set %qginseng 80      ; ginseng
+set %qarrabio 0       ; arrabio (maldecir arma)
+set %qceniza 0        ; ceniza volcánica (maldi)
+set %qpomez 0         ; piedra pómez
+set %qobsi 0          ; obsidiana
+set %qsemilla 0       ; semilla de sangre
+set %qazufre 0        ; azufre
+set %qseta 0          ; seta del verdugo
+
+set %qexplo 25        ; pergas explo
+set %qflame 10         ; pergas flame
+set %qcorpor 20       ; pergas corpor
+
+set %qdiezmos 0       ; diezmos
+set %qcajitas 5       ; cajitas
+set %qflechas 0       ; flechas
+set %qvendas 70       ; vendas
+set %qmanzanas 10      ; manzanas
+}
+
+if %pj2 in #charid    ;    <----------------------- PJ 2
+{
+set %qvida 8         ; potis de vida
+set %qstam 18         ; potis de stam
+set %qdex 4          ; potis de dex
+set %qstr 6          ; potis de fuerza
+set %qmana 0          ; potis de maná
+set %qinvis 0        ; potis de invis
+set %qintel 0         ; potis de intel
+
+set %qmandrake 70      ; mandrake
+set %qblackpearl 70    ; black pearl
+set %qmusgo 70         ; blood moss
+set %qnight 0         ; nightsade
+set %qajo 10           ; garlic
+set %qash 10           ; sulfurus ash
+set %qsilk 10         ; spiders silk
+set %qginseng 0      ; ginseng
+set %qarrabio 0       ; arrabio (maldecir arma)
+set %qceniza 0        ; ceniza volcánica (maldi)
+set %qpomez 0
+set %qobsi 0
+set %qsemilla 0
+set %qazufre 0
+set %qseta 0
+
+set %qexplo 0        ; pergas explo
+set %qflame 0         ; pergas flame
+set %qcorpor 0       ; pergas corpor
+
+set %qdiezmos 120       ; diezmos
+set %qcajitas 5       ; cajitas
+set %qflechas 80       ; flechas
+set %qvendas 90       ; vendas
+set %qmanzanas 10      ; manzanas
+}
+
+if %pj3 in #charid   ;    <----------------------- PJ 3
+{
+set %qvida 5         ; potis de vida
+set %qstam 10         ; potis de stam
+set %qdex 5          ; potis de dex
+set %qstr 6          ; potis de fuerza
+set %qmana 0          ; potis de maná
+set %qinvis 1        ; potis de invis
+set %qintel 0         ; potis de intel
+
+set %qmandrake 80      ; mandrake
+set %qblackpearl 80    ; black pearl
+set %qmusgo 80         ; blood moss
+set %qnight 10         ; nightsade
+set %qajo 100           ; garlic
+set %qash 100           ; sulfurus ash
+set %qsilk 30         ; spiders silk
+set %qginseng 100      ; ginseng
+set %qarrabio 50       ; arrabio (maldecir arma)
+set %qceniza 15        ; ceniza volcánica (insar)
+set %qpomez 0
+set %qobsi 0
+set %qsemilla 0
+set %qazufre 0
+set %qseta 0
+
+set %qexplo 0        ; pergas explo
+set %qflame 0         ; pergas flame
+set %qcorpor 0       ; pergas corpor
+
+set %qdiezmos 0       ; diezmos
+set %qcajitas 5       ; cajitas
+set %qflechas 0      ; flechas
+set %qvendas 100       ; vendas
+set %qmanzanas 50     ; manzanas
+}
+
+if %pj4 in #charid  ;    <----------------------- PJ 4
+{
+set %qvida 10         ; potis de vida
+set %qstam 4         ; potis de stam
+set %qdex 0          ; potis de dex
+set %qstr 5          ; potis de fuerza
+set %qmana 0          ; potis de maná
+set %qinvis 3        ; potis de invis
+set %qintel 4         ; potis de intel
+
+set %qmandrake 90      ; mandrake
+set %qblackpearl 90    ; black pearl
+set %qmusgo 90         ; blood moss
+set %qnight 50         ; nightsade
+set %qajo 80           ; garlic
+set %qash 75           ; sulfurus ash
+set %qsilk 75         ; spiders silk
+set %qginseng 80      ; ginseng
+set %qarrabio 0       ; arrabio (maldecir arma)
+set %qceniza 0        ; ceniza volcánica (maldi)
+set %qpomez 0         ; piedra pómez
+set %qobsi 0          ; obsidiana
+set %qsemilla 0       ; semilla de sangre
+set %qazufre 0        ; azufre
+set %qseta 0          ; seta del verdugo
+
+set %qexplo 25        ; pergas explo
+set %qflame 10         ; pergas flame
+set %qcorpor 20       ; pergas corpor
+
+set %qdiezmos 0       ; diezmos
+set %qcajitas 5       ; cajitas
+set %qflechas 0       ; flechas
+set %qvendas 70       ; vendas
+set %qmanzanas 10      ; manzanas
+}
+
+; ----------------------------------- SET BÁSICOS (NO TOCAR)----------------------------------------
+
+set %manzanas QQD
+set %mandrake MZF
+set %blood JUF
+set %perla KUF
+set %ash SZF
+set %ajo KZF
+set %spider RZF
+set %ginseng JZF
+set %belladona WZF
+set %ceniza TZF
+set %arrabio YZF
+set %pomez XZF
+set %semilla EUF
+set %azufre FUF
+set %obsidiana VZF
+set %setaverdugo PZF
+set %tierra
+set %vendas ZLF
+set %vendasucia AMF
+set %pilon UEG
+set %vidacolor 254
+set %strcolor 696
+set %dexcolor 99
+set %stamcolor 37
+set %explocolor 18
+set %inviscolor 703
+set %manacolor 904
+set %intelcolor 1965
+set %flechas RWF
+set %diezmos POF
+set %cajitas IUD_LKF
+set %colorcajita 33
+set %pergaexplo FUL
+set %pergacorpor GUL
+set %pergaflame NUL
+set %potis WUF
+
+; ---------------------------------------- BUCLE PRINCIPAL ----------------------------------------
+
+set %tiempoinicio #time
+event exmsg #charid 3 6000 VACIANDO
+
+finditem %potis C_ , #backpackid
+if #findcol <> 18
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+}
+finditem %potis C_ , %bolsadeapoyo
+for %i #findcnt 1
+{
+finditem %potis C_ , %bolsadeapoyo
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+}
+event exmsg #charid 3 6000 REPONIENDO
+
+gosub reponer %manzanas %qmanzanas #backpackid manzanas 95 200 %cofre
+gosub reponer %mandrake %qmandrake %bolsadeapoyo mandrakes 150 150 %bolsaregs
+gosub reponer %blood %qmusgo %bolsadeapoyo musguitos 150 150 %bolsaregs
+gosub reponer %perla %qblackpearl %bolsadeapoyo perlitas 150 150 %bolsaregs
+gosub reponer %ash %qash %bolsadeapoyo sulfurus 150 150 %bolsaregs
+gosub reponer %ajo %qajo %bolsadeapoyo ajos 150 150 %bolsaregs
+gosub reponer %belladona %qnight %bolsadeapoyo nightsade 150 150 %bolsaregs
+gosub reponer %spider %qsilk %bolsadeapoyo spiders 150 150 %bolsaregs
+gosub reponer %ginseng %qginseng %bolsadeapoyo ginseng 150 150 %bolsaregs
+gosub reponer %arrabio %qarrabio %bolsadeapoyo arrabios 150 150 %bolsaregs
+gosub reponer %ceniza %qceniza %bolsadeapoyo cenizas 150 150 %bolsaregs
+gosub reponer %setaverdugo %qseta %bolsadeapoyo setas 150 150 %bolsaregs
+gosub reponer %azufre %qazufre %bolsadeapoyo azufres 150 150 %bolsaregs
+gosub reponer %obsidiana %qobsi %bolsadeapoyo obsidianas 150 150 %bolsaregs
+gosub reponer %tierra %qtierra %bolsadeapoyo tierras 150 150 %bolsaregs
+gosub reponer %pomez %qpomez %bolsadeapoyo pomez 150 150 %bolsaregs
+gosub reponer %semilla %qsemilla %bolsadeapoyo semillas 150 150 %bolsaregs
+gosub reponer %diezmos %qdiezmos %bolsadeapoyo diezmos 60 150 %cofre
+gosub reponer %flechas %qflechas %bolsadeapoyo flechas 20 150 %cofre
+gosub reponer %pergaexplo %qexplo %bolsadeapoyo explos 20 70 %cofre
+gosub reponer %pergacorpor %qcorpor %bolsadeapoyo corpor 75 70 %cofre
+gosub reponer %pergaflame %qflame %bolsadeapoyo flames 55 70 %cofre
+
+gosub potis %qvida %vidacolor %bolsadeapoyo 45 20
+gosub potis %qstam %stamcolor %bolsadeapoyo 60 20
+gosub potis %qstr %strcolor %bolsadeapoyo 30 20
+gosub potis %qdex %dexcolor %bolsadeapoyo 75 20
+gosub potis %qinvis %inviscolor %bolsadeapoyo 90 20
+gosub potis %qmana %manacolor %bolsadeapoyo 75 20
+gosub potis %qintel %intelcolor %bolsadeapoyo 75 20
+
+gosub vendas 20 90
+
+gosub cajitas 45 130
+
+finditem %pergaexplo C_ , %bolsadeapoyo
+if #findcnt > 1
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %bolsadeapoyo
+wait 15
+}
+finditem %pergacorpor C_ , %bolsadeapoyo
+if #findcnt > 1
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %bolsadeapoyo
+wait 15
+}
+finditem %pergaflame C_ , %bolsadeapoyo
+if #findcnt > 1
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %bolsadeapoyo
+wait 15
+}
+set %tiempofinal #time
+set %boxes ( %tiempofinal - %tiempoinicio )
+event exmsg #charid 3 6000 [REPUESTO]
+event exmsg #charid 3 6000 [ Tiempo: %boxes s]
+return
+
+sub reponer
+if %2 = 0
+{
+return
+}
+event exmsg #charid 3 6000 Checqueando %4
+finditem %1 C_ , %3
+set %cantidad ( %2 - #findstack )
+finditem %1 C_ , %3
+if #findstack => %2
+{
+event exmsg #charid 3 6000 Suficientes %4
+return
+}
+finditem %1 C_ , %7
+exevent drag #findid %cantidad - #findstack
+wait 5
+finditem %1 C_ , %3
+if #findcnt > 0
+{
+exevent dropc %3
+}
+if #findcnt < 1
+{
+exevent dropc %3 %5 %6
+}
+wait 15
+return
+
+sub potis
+if %1 = 0
+{
+return
+}
+event exmsg #charid 3 6000 Reponiendo potis
+finditem %potis C_ , %7
+for #findindex 1 #findcnt
+{
+if #findcol = %2
+{
+exevent drag #findid %1 - #findstack
+wait 5
+exevent dropc %3 %4 %5
+wait 20
+}
+}
+return
+
+
+sub vendas
+if %qvendas = 0
+{
+return
+}
+finditem %vendasucia C_ , #backpackid
+if #findcnt > 0
+{
+finditem %vendasucia C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+target
+finditem %pilon C_ , #backpackid
+set #ltargetid #findid
+set #ltargetkind 1
+event exmsg #charid 3 6000 Limpio vendas sucias...
+event macro 22 0
+finditem %vendas C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+}
+finditem %vendas C_ , #backpackid
+if #findstack => %qvendas
+{
+event exmsg #charid 3 6000 Suficientes vendas...
+return
+}
+set %cantidad ( %qvendas - #findstack )
+finditem %vendas C_ , %cofre
+exevent drag #findid %cantidad - #findstack
+wait 5
+exevent dropc #backpackid
+wait 20
+finditem %vendas C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+exevent dropc #backpackid %1 %2
+wait 15
+return
+
+sub cajitas
+if %qcajitas = 0
+{
+return
+}
+finditem %bolsacajitas C_ , %cofre
+set #lobjectid #findid
+event macro 17 0
+finditem %cajitas C_ , #backpackid
+event exmsg #charid 3 6000 Dejando cajitas...
+for %i #findcnt 1
+{
+finditem %cajitas C_ , #backpackid
+if #findcol = 0
+{
+exevent drag #findid
+wait 5
+exevent dropc %sintrampa
+wait 15
+}
+else
+{
+exevent drag #findid
+wait 5
+exevent dropc %bolsacajitas
+wait 15
+}
+}
+set %posx %1
+set %posy %2
+set %fila 0
+event exmsg #charid 3 6000 Pillando cajitas trampa...
+finditem %cajitas C_ , %bolsacajitas
+for %i %qcajitas 1
+{
+finditem %cajitas C_ , %bolsacajitas
+set %fila ( %fila + 1 )
+if %fila = 6
+{
+set %posy ( %posy - 12 )
+set %posx ( %posx - 50 )
+}
+exevent drag #findid
+wait 5
+exevent dropc #backpackid %posx %posy
+wait 15
+set %posx ( %posx + 10 )
+}
+return
+
+o          `O    Oo    `OooOOo.  ooOoOOo .oOOOo.
+O           o   o  O    o     `o    O    o     o
+o           O  O    o   O      O    o    O.
+O           O oOooOoOo  o     .O    O     `OOoo.
+o     o     o o      O  OOooOO'     o          `O
+O     O     O O      o  o    o      O           o
+`o   O o   O' o      O  O     O     O    O.    .O
+ `OoO' `OoO'  O.     O  O      o ooOOoOo  `oooO'

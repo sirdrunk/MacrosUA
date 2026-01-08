@@ -1,0 +1,51 @@
+; Estando activa, esta macro te avisa antes de que se te destruya un item que lleves equipado durante PVM
+
+set %limite 7       ; límite inferior de durabilidad para que salte el aviso
+
+set #sysmsgcol 1981
+Event SysMessage Supervisor de Durabilidad (03/12/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+inicio:
+
+finditem * C_ , #charid
+for %i #findcnt 1
+{
+finditem * C_ , #charid
+event property #findid
+str Pos #property $
+set %until #strres
+str Left #property %until
+set %item #strres
+str Pos #property Durabilidad
+set %until #strres + 12
+str Len #property
+set %total #strres - %until
+str Right #property %total
+set %final #strres
+if %total = 10
+{
+str Left %final 3
+}
+if %total = 8 || %total = 9
+{
+str Left %final 2
+}
+if %total = 7
+{
+str Left %final 1
+}
+if #strres < %limite
+{
+display %item tiene #strres de durabilidad
+}
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+wait 100
+ignoreitem reset
+
+goto inicio
+

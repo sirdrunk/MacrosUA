@@ -1,0 +1,7 @@
+; Sirve para ver el código de cada color del texto de EasyUO por si lo quieres usar en tus macros
+
+for %i 1000 9999
+{
+event exmsg #charid 3 %i Color N. %i
+wait 0
+}

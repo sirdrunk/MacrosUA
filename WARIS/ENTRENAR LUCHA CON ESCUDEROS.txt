@@ -1,0 +1,115 @@
+; ||||||||||||||||||||||| SET BÁSICOS ||||||||||||||||
+
+set %pilon UEG_TEE_WEE_VEE_QEE        ; Type de los pilones de agua
+set %vendas ZLF                       ; Type de las vendas limpias
+set %sucias AMF                       ; Type de las vendas sucias
+set %escudero IS_HS                   ; Type de los escuderos
+set %rango 1                          ; Distancia a la que buscar el escudero
+set %minhealth 99                     ; Vida mínima a partir de la cual se empieza a curar
+set %tiempovenda 20		      ; Segundos a esperar para volver a tirarse venda	
+set %spamtime 0
+set %waitforvenda 0
+
+set #sysmsgcol 1981
+Event SysMessage Entrenar Escuderos (Lucha) (17/12/2025)
+set #sysmsgcol 1946
+Event SysMessage Discord: warisahluwalia
+
+set #targcurs 1
+display yesno Selecciona el tipo de arma que vas a usar para entrenar.$Pulsa "No" si vas a entrenar boxeo.
+if #dispres = Yes
+   {
+   repeat
+   wait 1
+   until #targcurs = 0
+   set #lobjectid #ltargetid
+   event macro 17 0
+   set %arma #lobjecttype
+   wait 10
+   set #targcurs 0
+   }
+else
+   {
+   set %arma No
+   set #targcurs 0
+   }
+
+ignoreitem reset
+
+loop:
+
+finditem %arma C_ , #charid
+if #findcnt < 1 && %arma <> No
+   {
+   finditem %arma C_ , #backpackid
+   if #findcnt < 1
+      {
+      display No te quedan armas
+      }
+   else
+      {
+      set #lobjectid #findid
+      event macro 17 0
+      wait 10
+      set #targcurs 0
+      }
+   }
+scan:
+if #hits < %minhealth
+   {
+   gosub curar
+   }
+finditem %escudero G_ , %rango
+if #findcnt < 2 && #findid = #charid || #findcnt < 1
+   {
+   ignoreitem #charid
+   goto scan
+   }
+if #findrep = 6 && #scnt > %spamtime
+   {
+   set %spamtime ( #scnt + 2 )
+   set #ltargetid #findid
+   event macro 27 0
+   }
+finditem %vendas
+if #findcnt < 1 || #findstack < 5
+   {
+   gosub limpiavendas
+   }
+goto loop
+
+; ||||||||||||||||||||||| SE CURA ||||||||||||||||
+
+sub curar
+
+if #hits < %minhealth && #scnt > %waitforvenda
+   {
+   event macro 1 0 .vendas
+   target
+   event macro 23 0
+   wait 10
+   set %waitforvenda ( #scnt + %tiempovenda )
+   }
+return
+
+; ||||||||||||||||||||||| LIMPIA VENDAS ||||||||||||||||
+
+sub limpiavendas
+
+finditem %sucias C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+target
+finditem %pilon C_ , #backpackid
+set #ltargetid #findid
+event macro 22 0
+wait 20
+finditem %vendas C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+exevent dropc #backpackid
+wait 20
+return
+   
+
+

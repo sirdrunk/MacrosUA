@@ -1,0 +1,284 @@
+;------------------------------- CONFIGURAR -------------------------------------
+
+set %hacha IOTASOD        ; ID del hacha
+set %runabosque 1         ; Nº de la runa al bosque
+set %runacasa 2           ; Nº de la runa a casa
+set %cofre KWGOFND        ; ID del cofre
+set %librorunas ZHPPGQD   ; ID del libro de runas
+set %maxpeso ( #maxweight - 20 )
+;------------------------------- CONFIGURAR -------------------------------------
+; Si quieres limitar en coordenadas el área de talado, la macro de Nilaween lo hacía modificando estos valores:
+set %pArrIzdaX 0
+set %pArrIzdaY 0
+set %pAbaDchaX 9999
+set %pAbaDchaY 9999
+
+;-------------------------------------------------------------------------------
+
+set %posinitx %pArrIzdaX + ( ( %pAbaDchaX - %pArrIzdaX ) / 2 )
+set %posinity %pArrIzdaY + ( ( %pAbaDchaY - %pArrIzdaY ) / 2 )
+
+set %i *tiempo + 172800000
+if %i < #SYSTIME || *tiempo > #SYSTIME
+set *tiempo #SYSTIME
+
+set #sysmsgcol 1981
+Event SysMessage Macro Talar de Nilaween adaptada (30/11/2025)
+set #sysmsgcol 1946
+Event SysMessage Modificaciones: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+GOSUB RECALBOSQUE
+GOSUB SCAN
+
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+
+SUB SCAN  ;-------------------------------------------------------------------------------
+
+tile init
+
+nuevaposicion:
+set *posx #CHARPOSX
+set *posy #CHARPOSY
+set %cuadro 0
+
+creandocuadro:
+
+set %cuadro %cuadro + 1
+if %cuadro > 100
+   {
+   gosub init
+   }
+set %ArIx *posx - %cuadro
+set %ArIy *posy + %cuadro
+set %AbDy *posy - %cuadro
+set %AbDx *posx + %cuadro
+
+set %ArIy %ArIy - 1
+gosub buscador %ArIy %AbDy %ArIx 0 4
+set %ArIx %ArIx + 1
+gosub buscador %ArIx %AbDx 0 %AbDy 3
+set %ArIy %ArIy + 1
+set %AbDy %AbDy + 1
+gosub buscador %AbDy %ArIy %AbDx 0 4
+set %ArIx %ArIx - 1
+set %AbDx %AbDx - 1
+gosub buscador %AbDx %ArIx 0 %ArIy 3
+
+goto creandocuadro
+
+sub buscador
+for % . %5 %1 %2
+    {
+    tile get %3 %4 2
+    if ( LEAVES IN #TILENAME || TREE IN #TILENAME || NEEDLES IN #TILENAME ) && %3 , %4 notIn *desechadosp && %3 , %4 notIN *desechados0 && %3 , %4 notIN *desechados1 && %3 , %4 notIN *desechados2 && %3 , %4 notIN *desechados3 && %3 , %4 notIN *desechados4 && %3 , %4 notIN *desechados5 && %3 , %4 notIN *desechados6 && %3 , %4 notIN *desechados7 && %3 , %4 notIN *desechados8 && %3 , %4 notIN *desechados9 && %3 , %4 notIN *desechados10 && %3 , %4 notIN *desechados11 && %3 , %4 notIN *desechados12 && O'HII notIN #TILENAME && YEW notIN #TILENAME && %3 > %pArrIzdaX && %3 < %pAbaDchaX && %4 > %pArrIzdaY && %4 < %pAbaDchaY
+       {
+       gosub esperando %3 %4
+       }
+    }
+return
+
+sub esperando
+set %tiempo #SYSTIME - *tiempo
+while %tiempo > 46800000
+set %tiempo %tiempo - 46800000
+set %n %tiempo / 3600000
+str left *desechados . %n 13
+if #strRes < #SYSTIME || *desechados . %n = N/A
+set *desechados . %n #SYSTIME + 46500000
+set *desechados . %n *desechados . %n , _ , %1 , %2
+
+if NEEDLES in #TILENAME || LEAVES in #TILENAME
+   {
+   tile get %1 %2 3
+   set %
+   }
+if #TILEZ = 0 && #TILECNT = 0 && #TILETYPE = 0 && TREE notIn #TILENAME
+   {
+   return
+   }
+   
+gosub checkSave
+move %1 %2 1 15s
+set #LTARGETX %1
+set #LTARGETY %2
+set #LTARGETZ #TILEZ
+set #LTARGETTILE #TILETYPE
+set #LTARGETKIND 3
+
+GOSUB TALAR
+
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+
+SUB TALAR   ;-----------------------------------------------------------------------------------------------
+
+talando:
+if #weight > %maxpeso
+   {
+   gosub recalcasa
+   }
+set #LOBJECTID %hacha
+set #TARGCURS 0
+gosub checkSave
+event macro 17 0
+target 10s
+event macro 22 0
+set %jEnd #JINDEX
+set %tiempo #scnt + 10
+controlando:
+if #weight > #maxweight
+   {
+   gosub pacasa
+   }
+repeat
+if #scnt > %tiempo
+goto talando
+until %jEnd <> #JINDEX
+set %jStart %jEnd + 1
+set %jEnd #JINDEX
+for %i %jStart %jEnd
+    {
+    scanjournal %i
+    if AQUI_NO_HAY_NADA in #JOURNAL || NO_LO_ALCANZAS in #JOURNAL || PARECE_QUE_ES_INMUNE in #JOURNAL || YOU_CANNOT_CHOP_SO in #JOURNAL || ESO_ESTA_MUY_LEJOS in #JOURNAL || SEE_THE_TARGET in #JOURNAL
+       {
+       gosub scan
+       }
+    if PONES_EL_TRONCO in #JOURNAL || PONES_EL_PIEZA_DE_AMBAR in #journal || A_TUS_PIES in #JOURNAL || PERO_NO_OBTIENES_MADERA_UTIL in #JOURNAL || YOUR_SKILL_IN in #JOURNAL
+       }
+       goto talando
+       }
+    }
+goto controlando
+
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+
+SUB INIT
+
+if %pArrIzdaX = 0 && %pAbaDchaX > 6000
+   {
+   return
+   }
+set %cuadro 1
+move %posinitx %posinity 4 600s
+return
+
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+
+SUB RECALBOSQUE
+
+ if %runabosque <= 8
+{
+    set %runax 130
+    set %runay 55 + ( %runabosque * 15 )
+}
+
+    if %runabosque > 8
+{
+    set %runax 290
+    set %runay 55 + ( ( %runabosque - 8 ) * 15 )
+}
+repite_bosque:
+finditem %librorunas C_ , #BACKPACKID
+set #lobjectid #findid
+gosub checkSave
+event macro 17 0
+wait 10
+click %runax %runay f
+set %posX #charposx
+set %posY #charposy
+set %time ( #scnt + 12 )
+gosub waitrecall
+if #charposx = %posX && #charposy = %posY 1
+goto repite_bosque
+return
+
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+
+SUB RECALCASA
+set %vuelvex #charposx
+set %vuelvey #charposy
+   if %runacasa <= 8
+{
+    set %runax 130
+    set %runay 55 + ( %runacasa * 15 )
+}
+
+    if %runacasa > 8
+{
+    set %runax 290
+    set %runay 55 + ( ( %runacasa - 8 ) * 15 )
+}
+repite_casa:
+finditem %librorunas C_ , #BACKPACKID
+set #lobjectid #findid
+gosub checkSave
+event macro 17 0
+wait 10
+click %runax %runay f
+set %posX #charposx
+set %posY #charposy
+set %time ( #scnt + 12 )
+gosub waitrecall
+if #charposx = %posX && #charposy = %posY 1
+goto repite_casa
+event macro 1 0 .resend
+wait 10
+repeat
+{
+finditem ZLK_RVF C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+}
+until #findcnt < 1
+finditem %cofre G_3
+set #lobjectid #findid
+event macro 17 0
+wait 5
+gosub reponer MZF
+gosub reponer JUF
+gosub reponer KUF
+until #findcnt = 0
+gosub recalbosque
+move %vuelvex %vuelvey 0 0
+return
+
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+sub waitrecall ; ------------------------------------------- SUB WAITRECALL --------------------------------------
+recalwait:
+gosub checkSave
+if #charposx <> %posX && #charposy <> %posY || #scnt > %time
+{
+return
+}
+goto recalwait
+
+;--------------------------------------------------------------------------------------------------------
+sub checkSave ;-------------------------- SAVE AUTOMÁTICOS ----------------------------------------------
+if #time > 510 && #time < 559 || #time > 13510 && #time < 13559 || #time > 30510 && #time < 30559 || #time > 43510 && #time < 43559 || #time > 60510 && #time < 60559 || #time > 73510 && #time < 73559 || #time > 90510 && #time < 90559 || #time > 103510 && #time < 103559 || #time > 120510 && #time < 120559 || #time > 133510 && #time < 133559 || #time > 150510 && #time < 150559 || #time > 163510 && #time < 163559 || #time > 180510 && #time < 180559 || #time > 193510 && #time < 193559 || #time > 210510 && #time < 210559 || #time > 223510 && #time < 223559
+   {
+   event exmsg #charid 3 6000 [PAUSA: SAVE]
+   wait 65s
+   event exmsg #charid 3 6000 [REANUDANDO]
+   }
+return
+;-----------------------------------------------------------------------------------------------------------
+;-----------------------------------------------------------------------------------------------------------
+SUB REPONER
+finditem %1 C_ , #backpackid
+if #findcnt < 1 || #findstack < 5
+   {
+   finditem %1 C_ , %cofre
+   exevent drag #findid 20 - #findstack
+   wait 5
+   exevent dropc #backpackid
+   wait 15
+   }
+return

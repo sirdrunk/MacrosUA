@@ -1,0 +1,629 @@
+;-------------------------------- ID PRINCIPALES --------------------------------------------
+; NO OLVIDES QUE DEBES TENER LOS BODS CORTOS INCOMPLETOS EN LA MOCHILA, Y NO LARGOS.
+set %cofre BCXWNOD                ; ID del cofre con todos los lingotes en el primer nivel
+set %bolsamartillos NCIIROD       ; ID de la bolsa llena de mazos de herrero
+set %bolsabods WTHMUMD		  ; Bolsa donde va a dejar los bods que vaya completando
+
+;-------------------------------- TYPE GENÉRICOS ------------------------------------------
+set %martillo GBG
+set %bod TVH_EWH
+set %lingotes RMK
+;-------------------------------- CLICKS GENÉRICOS ------------------------------------------
+
+set %mineralx 70          ; X del botón para cambiar mineral
+set %mineraly 450         ; Y del botón para cambiar mineral
+
+set %cambiopagx 435       ; X del botón de cambio de página ("SIGUIENTE") en el menú herrero dentro de cambiar mineral
+set %cambiopagy 350       ; Y del botón de cambio de página ("SIGUIENTE") en el menú herrero dentro de cambiar mineral
+
+set %fabultimox 325       ; X del botón FABRICAR ULTIMO
+set %fabultimoy 495       ; Y del botón FABRICAR ULTIMO
+
+set %completbodx 350      ; X de la bolita azul de "Insertar" en un bod
+set %completbody 220      ; Y de la bolita azul de "Insertar" en un bod
+
+set %insertbodx 250       ; X del botón "Insertar" del libro de bods
+set %insertbody 460       ; Y del botón "Insertar" del libro de bods
+
+set %placasx 70           ; X del botón "Coraza de Placas" del menú herrero
+set %placasy 130          ; Y del botón "Coraza de Placas" del menú herrero
+
+set %piezax 270           ; X común de todos los botones para fabricar cada pieza de armor
+set %corazay 210          ; Y del botón "Coraza"
+set %grebasy 190          ; Y del botón "Grebas"
+set %brazalesy 170        ; Y del botón "Brazales"
+set %cascoy 150           ; Y del botón "Casco"
+set %guantesy 130         ; Y del botón "Guantes"
+set %collariny 110        ; Y del botón "Collarin"
+
+set %materialx 270        ; X común a los botones de cada mineral
+set %broncey 170          ; Y del botón de cada mineral:
+set %aceroy 190           ; ACERO
+set %mithrily 230         ; MITHRIL
+set %rosay 250            ; ROSE
+set %agapitey 270         ; AGAPITE
+set %veritey 290          ; VERITE
+set %valoritey 310        ; VALORITE
+set %rocasangrey 130      ; ROCA DE SANGRE
+set %rocanegray 150       ; ROCA NEGRA
+set %aquay 170            ; AQUA
+set %cristalinoy 190      ; CRISTALINO
+set %nievey 210           ; NIEVE
+set %litiumy 230          ; LITHIUM
+set %adamantiumy 250      ; ADAMANTIUM
+set %skyy 270             ; SKY
+set %kriptonitay 290      ; KRIPTONITA
+set %volcany 310          ; VOLCAN
+set %lunary 130           ; LUNAR
+set %acidoy 150           ; ACIDO
+set %hieloy 170           ; HIELO
+set %titany 190           ; TITAN
+set %dragony 210          ; DRAGÓN
+set %eclipsey 230         ; ECLIPSE
+
+set #sysmsgcol 1981
+Event SysMessage Bodmaster (03/12/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+
+;--------------------------------- SETEAR SESION ---------------------------------------------
+
+
+set %gamamedia #TRUE
+set %gamaalta #TRUE
+gosub checkbod
+
+sub checkbod ;--------------------------------- PEDIR Y CHECKEAR BOD -------------------------------------
+finditem %bod C_ , #backpackid
+if #findcnt < 1
+{
+display No quedan más bods en la mochila
+halt
+}
+set %bodactual #findid
+event property %bodactual
+wait 10
+                          ;---------------------- POSIBLES PIEZAS -----------------------------------------
+
+if Coraza in #property && Grebas notin #property && Collarin notin #property && Brazales notin #property && Guantes notin #property && Casco notin #property
+{
+set %pieza coraza
+set %type HSH
+set %piezay %corazay
+set %qlingotes 25
+}
+if Grebas in #property
+{
+set %pieza grebas
+set %type LSH
+set %piezay %grebasy
+set %qlingotes 20
+}
+if Brazales in #property
+{
+set %pieza brazales
+set %type MSH
+set %piezay %brazalesy
+set %qlingotes 18
+}
+if Casco in #property
+{
+set %pieza casco
+set %type OSH
+set %piezay %cascoy
+set %qlingotes 15
+}
+if Guantes in #property
+{
+set %pieza guantes
+set %type ISH
+set %piezay %guantesy
+set %qlingotes 12
+}
+if Collarin in #property
+{
+set %pieza collarin
+set %type NSH
+set %piezay %collariny
+set %qlingotes 10
+}
+
+if Coraza in #property && Grebas in #property
+{
+set %pieza largo
+}
+
+                        ;------------------ POSIBLES MINERALES ---------------------------------------------
+if Bronze in #property
+{
+set %mineral bronce
+set %color 1750
+set %gama baja
+set %materialy %broncey
+set %pag 1
+}
+if Rose in #property
+{
+set %mineral rosa
+set %color 1637
+set %gama baja
+set %materialy %rosay
+set %pag 1
+}
+if Acero in #property
+{
+set %mineral acero
+set %color 901
+set %gama baja
+set %materialy %aceroy
+set %pag 1
+}
+if Mytheril in #property
+{
+set %mineral mithril
+set %color 1325
+set %gama baja
+set %materialy %mithrily
+set %pag 1
+}
+if Agapite in #property
+{
+set %mineral agapite
+set %color 1024
+set %gama baja
+set %materialy %agapitey
+set %pag 1
+}
+if Verite in #property
+{
+set %mineral verite
+set %color 2001
+set %gama baja
+set %materialy %veritey
+set %pag 1
+}
+if Valorite in #property
+{
+set %mineral valorite
+set %color 1301
+set %gama baja
+set %materialy %valoritey
+set %pag 1
+}
+if Bloodrock in #property
+{
+set %mineral bloodrock
+set %color 1218
+set %gama baja
+set %materialy %rocasangrey
+set %pag 2
+}
+if Blackrock in #property
+{
+set %mineral blackrock
+set %color 1109
+set %gama baja
+set %materialy %rocanegray
+set %pag 2
+}
+if Aqua in #property
+{
+set %mineral aqua
+set %color 10
+set %gama media
+set %materialy %aquay
+set %pag 2
+}
+if Nieve in #property
+{
+set %mineral nieve
+set %color 1153
+set %gama media
+set %materialy %nievey
+set %pag 2
+}
+if Cristalino in #property
+{
+set %mineral cristalino
+set %color 101
+set %gama media
+set %materialy %cristalinoy
+set %pag 2
+}
+if Litium in #property
+{
+set %mineral litium
+set %color 622
+set %gama media
+set %materialy %litiumy
+set %pag 2
+}
+if Adamantium in #property
+{
+set %mineral adamantium
+set %color 39
+set %gama media
+set %materialy %adamantiumy
+set %pag 2
+}
+if Sky in #property
+{
+set %mineral sky
+set %color 91
+set %gama media
+set %materialy %skyy
+set %pag 2
+}
+if Kriptonita in #property
+{
+set %mineral kriptonita
+set %color 1926
+set %gama media
+set %materialy %kriptonitay
+set %pag 2
+}
+if Volcan in #property
+{
+set %mineral volcan
+set %color 1925
+set %gama media
+set %materialy %volcany
+set %pag 2
+}
+if Lunar in #property
+{
+set %mineral lunar
+set %color 53
+set %gama media
+set %materialy %lunary
+set %pag 3
+}
+if Acido in #property
+{
+set %mineral acido
+set %color 1927
+set %gama alta
+set %materialy %acidoy
+set %pag 3
+}
+if Hielo in #property
+{
+set %mineral hielo
+set %color 1152
+set %gama alta
+set %materialy %hieloy
+set %pag 3
+}
+if Titan in #property
+{
+set %mineral titan
+set %color 1944
+set %gama alta
+set %materialy %titany
+set %pag 3
+}
+if Dragon in #property
+{
+set %mineral dragon
+set %color 1941
+set %gama alta
+set %materialy %dragony
+set %pag 3
+}
+if Eclipse in #property
+{
+set %mineral eclipse
+set %color 1953
+set %gama alta
+set %materialy %eclipsey
+set %pag 3
+}
+gosub decision
+
+sub decision ;------------------------------------ QUÉ HACEMOS CON ESE BOD? -----------------------------------------------------
+event exmsg #charid 3 6000 Ha salido %pieza de %mineral
+if %pieza = largo
+{
+event exmsg #charid 3 6000 Bod largo, la macro se para.
+halt
+}
+else
+{
+event exmsg #charid 3 6000 A fabricarlo!
+gosub preparar
+}
+event exmsg #charid 3 6000 Listo, pilla siguiente.
+wait 5s
+gosub checkbod
+
+sub almacenar ;------------------------------------ ALMACENAMOS Y ESPERAMOS ----------------------------
+finditem %librobods C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 30
+click %insertbodx %insertbody
+target
+finditem %bodactual C_ , #backpackid
+set #ltargetkind 1
+set #ltargetid #findid
+event macro 22 0
+wait 10
+execute cmd.exe /c echo He guardado %pieza de %mineral >> BODS.txt
+gosub espera
+set #targcurs 0
+return
+
+sub preparar ;---------------------------------- FABRICAR -----------------------------------------------
+
+finditem %cofre G_3
+set #lobjectid #findid
+event macro 17 0
+wait 5
+finditem %bolsamartillos C_ , %cofre
+set #lobjectid #findid
+event macro 17 0
+wait 5
+finditem GBG C_ , #charid
+if #findcnt < 1
+{
+event exmsg #charid 3 6000 Reponiendo martillo
+gosub reponmartillo
+}
+finditem %mr C_ , #backpackid
+if #findcnt = 0 || #findstack < 5
+{
+gosub reponer %mr
+}
+finditem %bp C_ , #backpackid
+if #findcnt = 0 || #findstack < 5
+{
+gosub reponer %bp
+}
+finditem %bm C_ , #backpackid
+if #findcnt = 0 || #findstack < 5
+{
+gosub reponer %bm
+}
+goto lingotear
+lingotear:
+finditem %type C_ , #backpackid
+if #findcnt > 9
+{
+event exmsg #charid 3 6000 Listo, voy a insertarlos en el bod
+gosub insertar
+}
+finditem %lingotes C_ , #backpackid
+if #findcnt > 0
+{
+set %carga ( ( ( #maxweight - ( #weight + 15 ) ) / ( %qlingotes * 2 ) ) )
+set %cantidad ( %qlingotes * %carga )
+set %drag ( %cantidad - #findstack )
+}
+if #findstack < %qlingotes || #findcnt = 0
+{
+ set %carga ( ( ( #maxweight - ( #weight + 15 ) ) / ( %qlingotes * 2 ) ) )
+ set %cantidad ( %qlingotes * %carga )
+ set %drag %cantidad
+ finditem %lingotes C_ , %cofre
+ for %i #findcnt 1
+ {
+     finditem %lingotes C_ , %cofre
+     if #findcol = %color && #findstack < ( %qlingotes * 10 )
+        {
+        display No te quedan suficientes lingotes de %mineral
+        halt
+        }
+     if #findcol = %color
+        {
+        exevent drag #findid %drag - #findstack
+        wait 5
+        exevent dropc #backpackid
+        wait 20
+        break
+        }
+     ignoreitem #findid
+     set #findindex #findindex + 1
+ }
+ignoreitem reset
+gosub seleccionar
+goto lingotear
+
+
+sub seleccionar ;--------------------------------- CLCIKS MENU -------------------------------------
+finditem GBG C_ , #charid
+if #findcnt < 1
+{
+event exmsg #charid 3 6000 Reponiendo martillo
+gosub reponmartillo
+}
+event exmsg #charid 3 6000 Selecciono mineral...
+finditem %lingotes C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 10
+click %mineralx %mineraly
+wait 10
+if %pag > 1
+{
+for %i %pag 2
+{
+click %cambiopagx %cambiopagy
+wait 10
+}
+}
+click %materialx %materialy
+wait 10
+event exmsg #charid 3 6000 Selecciono pieza...
+click %placasx %placasy
+wait 10
+click %piezax %piezay
+wait 40
+
+fabricar:
+finditem %type C_ , #backpackid
+if #findcnt > 9
+{
+gosub insertar
+}
+finditem GBG C_ , #charid
+if #findcnt < 1
+{
+event exmsg #charid 3 6000 Reponiendo martillo
+gosub reponmartillo
+}
+finditem %lingotes C_ , #backpackid
+if #findcnt = 0 || #findstack < %qlingotes
+{
+gosub preparar
+}
+finditem %type C_ , #backpackid
+if #findcnt <= 9
+{
+set %pesowait #weight
+set %tiempowait ( #SCNT + 5 )
+click %fabultimox %fabultimoy
+}
+repeat
+wait 1
+until #weight <> %pesowait || #scnt > %tiempowait
+goto fabricar
+
+sub insertar ;----------------------------- INSERTA PIEZAS EN EL BOD -------------------------------
+finditem %bod C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 10
+click %completbodx %completbody
+target
+for %i 10 1
+{
+finditem %type C_ , #backpackid
+set #ltargetid #findid
+set #ltargetkind 1
+event macro 22 0
+wait 10
+}
+finditem %lingotes C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+finditem %bod C_ , #backpackid
+exevent drag #findid
+wait 5
+exevent dropc %bolsabods
+wait 15
+gosub checkbod
+
+
+sub recalcasa ;--------------------------------- RECALL A CASA -------------------------------------
+
+ if %runacasa <= 8
+{
+    set %runax 130
+    set %runay 55 + ( %runacasa * 15 )
+}
+
+    if %runacasa > 8
+{
+    set %runax 290
+    set %runay 55 + ( ( %runacasa - 8 ) * 15 )
+}
+repite_casa:
+while #mana < 11
+{
+wait 1
+}
+finditem %librorunas C_ , #BACKPACKID
+set #lobjectid #findid
+event macro 17 0
+wait 10
+click %runax %runay f
+set %posX #charposx
+set %posY #charposy
+wait 12s
+finditem %cofre G_
+if #charposx = %poX && #charposy = %posY && %cofre <> #findid 1
+goto repite_casa
+event macro 1 0 .resend
+return
+
+sub recalbod  ;--------------------------------- RECALL AL HERRERO -------------------------------------
+
+if %runabod <= 8
+{
+    set %runax 130
+    set %runay 55 + ( %runabod * 15 )
+}
+
+    if %runabod > 8
+{
+    set %runax 290
+    set %runay 55 + ( ( %runabod - 8 ) * 15 )
+}
+
+repite_bod:
+while #mana < 11
+{
+wait 1
+}
+finditem %librorunas C_ , #BACKPACKID
+set #lobjectid #findid
+event macro 17 0
+wait 20
+click %runax %runay f
+set %posX #charposx
+set %posY #charposy
+wait 12s
+finditem %herrero G_
+if #charposx = %posx && #charposy = %posy && %herrero <> #findid 1
+goto repite_bod:
+gosub checkbod
+
+sub reponmartillo ;--------------------------------- REPONER MARTILLO -------------------------------------
+finditem GBG C_ , %bolsamartillos
+exevent drag #findid
+wait 5
+exevent dropc #backpackid
+wait 15
+finditem GBG C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 10
+return
+
+sub dejar  ;--------------------------------- DEJAR CEPILLOS O TINTES -------------------------------
+event exmsg #charid 3 6000 Dejando %3
+finditem %cofre G_3
+set #lobjectid #findid
+event macro 17 0
+wait 5
+finditem %1 C_ , #backpackid
+exevent drag #findid
+wait 5
+exevent dropc %2
+wait 15
+return
+
+sub reponer ;---------------------------------- REPONE REGS --------------------------------------------
+finditem %1 C_ , %cofre
+exevent drag #findid 20 - #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+return
+
+sub espera ;---------------------------------- VUELVE A CASA Y ESPERA -----------------------------------
+gosub recalcasa
+for %i %espera 1
+{
+event exmsg #charid 3 6000 Reanudando en %i , s
+wait 20
+}
+return
+
+
+
+

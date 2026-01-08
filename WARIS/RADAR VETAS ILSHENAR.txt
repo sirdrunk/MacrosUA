@@ -1,0 +1,79 @@
+; Esta macro sirve para minar más cómodamente los minerales Obsidiana, Iridio y Suboscuridad en Ilshenar.
+; Necesitas equiparte un pico mágico y llevar en la mochila el pico de diamante.
+; Asigna aquí debajo en la configuración las 2 teclas necesarias.
+
+; ------------ CONFIGURAR --------------------------
+
+set %teclaminar a         ; TECLA A PULSAR PARA MINAR LA VETA ENCONTRADA
+set %teclascan s          ; TECLA A PULSAR PARA REACTIVAR EL RADAR
+
+; ------- A PARTIR DE AQUÍ, NO TOCAR ---------------
+
+set #sysmsgcol 1981
+Event SysMessage Radar Vetas Ilshenar (27/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+set #targcurs 1
+event exmsg #CHARID 3 6000 Selecciona el pico de diamante
+while #targcurs = 1
+      {
+      wait
+      }
+set %picodiamante #ltargetid
+gosub scan
+
+sub scan
+finditem YUI_BVI_EVI G_
+if #findcnt > 0 && #findcol = 1255
+   {
+   event exmsg #CHARID 3 1560 OBSIDIANA DETECTADA
+   event exmsg #findid 3 1560 VETA DE OBSIDIANA
+   wait 10
+   event exmsg #findid 3 1560 VETA DE OBSIDIANA
+   event exmsg #CHARID 3 6000 Pulsa la tecla para minar o la tecla para seguir escaneando
+   gosub minar
+   }
+if #findcnt > 0 && #findcol = 1973
+   {
+   event exmsg #CHARID 3 1068 SUBOSCURIDAD DETECTADA
+   event exmsg #findid 3 1068 VETA DE SUBOSCURIDAD
+   wait 10
+   event exmsg #findid 3 1068 VETA DE SUBOSCURIDAD
+   event exmsg #CHARID 3 6000 Pulsa la tecla para minar o la tecla para seguir escaneando
+   gosub minar
+   }
+if #findcnt > 0 && #findcol = 1995
+   {
+   event exmsg #CHARID 3 1673 IRIDIO DETECTADO
+   event exmsg #findid 3 1673 VETA DE IRIDIO
+   wait 10
+   event exmsg #findid 3 1673 VETA DE IRIDIO
+   event exmsg #CHARID 3 6000 Pulsa la tecla para minar o la tecla para seguir escaneando
+   gosub minar
+   }
+gosub scan
+
+sub minar
+finditem YUI_BVI_EVI G_
+onhotkey %teclaminar
+         {
+         event exmsg #CHARID 3 6000 MINANDO
+         set %veta #findid
+         finditem %picodiamante C_ , #backpackid
+         set #lobjectid #findid
+         event macro 17 0
+         target
+         set #ltargetid %veta
+         set #ltargetkind 1
+         event macro 22 0
+         }
+onhotkey %teclascan
+         {
+         hideitem #findid
+         event exmsg #CHARID 3 6000 ESCANEANDO
+         wait 20
+         gosub scan
+         }
+gosub minar

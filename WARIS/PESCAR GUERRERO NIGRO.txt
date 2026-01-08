@@ -1,0 +1,610 @@
+;------------------------------------- CONFIGURACIÓN --------------------------------------
+
+set %bodega BEGHPQD                       ; ID de la bodega donde dejar lo quue se recoja
+set %recoger DYAB_HZHB_IIF                ; TYPE de los items a recoger del suelo
+set %bolsa BEGHPQD                        ; Bolsa donde llevar cepillos de durabilidad (es donde llevo el autoloot en UOSteam además)
+set %cepillos WFG                         ; TYPE de los cepillos de durabilidad
+set %rod KDF_XHF                          ; TYPE de la caña
+set %enemigos GD_IS_KI_P_OD_UGB_UN_WC     ; TYPE de los enemigos a combatir
+set %ronda 0                              ; NO TOCAR
+set %escudo FIK                           ; TYPE del escudo si es que usas
+set %comida QQD                           ; TYPE de la comida que irá comiendo cada X tiempo
+set %arma XXXXXXX                         ; ID de la katana o arma que vayas a usar
+
+; --------------------------------- CONFIGURAR LÍMITES DEL ÁREA ------------------------------------------
+
+set %limitE 1545
+set %limitW 1500
+set %limitS 390
+set %limitN 293
+
+; ------------- COORDENADAS DE LOS BOTONES DEL SISTEMA DE NAVEGACION --------------------------
+
+set %clickNorteX 125
+set %clickNorteY 60
+set %clickEsteX 200
+set %clickEsteY 125
+set %clickSurX 125
+set %clickSurY 190
+set %clickOesteX 50
+set %clickOesteY 125
+set %girarX 30
+set %girarY 250
+set %stopX 125
+set %stopY 125
+
+; ------------- NO TOCAR A PARTIR DE AQUÍ --------------------------
+
+ignoreitem #charid
+set #lpc 100
+set %tiempovenda #scnt
+set %vuelta 0
+set %waitattack 0
+set %waitdurab 0
+
+set #sysmsgcol 1981
+Event SysMessage Pesca para Guerrero Nigromante (27/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+display yesno Debes poner el barco en posicion Sur-Norte y colocarte en la punta (proa) mirando al Este o al Oeste. La macro empieza a barrer el mar en rectas horizontales hacia el Este u Oeste si la incias mirando hacia esa dirección hasta llegar a los límites de coordenadas que hayas definido. Pulsa "si" si quieres que avance después hacia el Norte y "No" si quieres que vaya hacia el Sur.
+
+if #chardir = 2
+   {
+   set %este #true
+   }
+if #chardir = 6
+   {
+   set %este #false
+   }
+display yesno ¿Sentido Norte?
+if #dispres = yes
+{
+set %ascendente 1
+}
+if #dispres = no
+{
+set %ascendente 0
+}
+
+event macro 1 0 navegacion
+
+GOSUB DIRECCION
+GOSUB PESCA
+
+SUB DIRECCION ;-------------------------- DECIDIR TARGET Y DIRECCIÓN A LA QUE SE MOVERÁ EL BARCO ----------------
+GOSUB CURAR
+if %este = #true
+   {
+   set %ltargetx ( #charposx + 4 )
+   set %ltargety ( #charposy )
+   set %clickX %clickEsteX
+   set %clickY %clickEsteY
+}
+if %este = #false
+   {
+   set %ltargetx ( #charposx - 4 )
+   set %ltargety ( #charposy )
+   set %clickX %clickOesteX
+   set %clickY %clickOesteY
+   }
+return
+
+SUB PESCA ;------------------------------ BUCLE DE PESCA -----------------------------------------------
+GOSUB CURAR
+if #scnt > %waitdurab
+   {
+   GOSUB DURABILIDAD
+   }
+GOSUB CHECK
+GOSUB DIRECCION
+set %ronda %ronda + 1
+if %ronda > 8
+{
+gosub moverse
+}
+finditem %rod C_ , #charid
+if #findcnt < 1
+{
+finditem %rod C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 5
+}
+finditem %rod
+set #lobjectid #findid
+event macro 17 0
+target
+set #LTARGETX %ltargetx
+set #LTARGETY %ltargety
+set #lTargetKind 3
+set %cmsg #jindex
+event macro 22 0
+wait 10
+set %mmsg #jindex
+for %i %cmsg %mmsg
+{
+scanjournal %i
+if Aqui_no_hay in #journal && agujero notin #journal
+{
+GOSUB MOVERSE
+}
+if agujero in #journal
+{
+GOSUB MALDECIR
+GOSUB WAITFORBICHO
+}
+}
+GOSUB CHECKSPERA
+set %fmsg #jindex
+for %i %submsg %fmsg
+{
+scanjournal %i
+if agujero in #journal
+{
+GOSUB MALDECIR
+GOSUB WAITFORBICHO
+}
+if No_Pescas in #journal && agujero notin #journal
+{
+GOSUB PESCA
+}
+if Aqui_no_hay in #journal && agujero notin #journal || Prueba_a in #journal && agujero notin #journal || Intenta in #journal && agujero notin #journal
+{
+GOSUB MOVERSE
+}
+}
+GOSUB PESCA
+
+SUB CHECK ;-------------------------------------- CHECKS ------------------------------------------------
+GOSUB CURAR
+if #charghost = yes
+   {
+   halt
+   }
+gosub checksave
+finditem %enemigos G_5
+if #findrep = 6  && #finddist < 5
+   {
+   set %enemy #findid
+   finditem %arma C_ , #charid
+   if #findcnt < 1
+      {
+      finditem %arma C_ , #backpackid
+      set #lobjectid #findid
+      event macro 17 0
+      wait 5
+      }
+   finditem %escudo C_ , #charid
+   if #findcnt < 1
+     {
+     finditem %escudo C_ , #backpackid
+     set #lobjectid #findid
+     event macro 17 0
+     wait 5
+     }
+   GOSUB ATTACK
+   }
+finditem %recoger G_2
+if #findcnt > 0
+    {
+    exevent drag #findid #findstack
+    wait 5
+    exevent dropc %bodega
+    wait 15
+    }
+if #charposx > %limitE || #charposx < %limitW
+   {
+   GOSUB CAMBIO
+   }
+if #charposy < %limitN || #charposy > %limitS
+   {
+   GOSUB END
+   }
+return
+
+SUB ATTACK ;------------------------------ ATACAR A LOS MONSTRUOS ---------------------------------------
+GOSUB CURAR
+set #ltargetkind 1
+set #ltargetid %enemy
+event macro 27 0
+matando:
+GOSUB CURAR
+ ignoreitem #charid
+finditem %enemigos G_4
+if #findcnt > 0 && #scnt > %waitattack
+   {
+   set #ltargetkind 1
+   set #ltargetid #findid
+   event macro 27 0
+   set %waitattack ( #scnt + 2 )
+   }
+if #finddist > 1
+   {
+    move #findx #findy 1
+   }
+if #findcnt = 0 && C notin #charstatus && #hits > 70
+   {
+   GOSUB CURAR
+   move %xdevuelta %ydevuelta 0 0
+    wait 20
+    if %dirdevuelta = 6
+       {
+       event macro 5 7
+       }
+    if %dirdevuelta = 2
+       {
+       event macro 5 3
+       }
+   event macro 1 0 .resend
+   wait 60
+   return
+   }
+set %vuelta %vuelta + 1
+if %vuelta > 40
+  {
+   event macro 27 0
+   set %vuelta 0
+  }
+  GOSUB CURAR
+goto matando
+;--------------------------------------------------------------------------------------------------------
+SUB MOVERSE ;----------------------------- AVANZAR CON EL BARCO -----------------------------------------
+GOSUB CURAR
+set %ronda 0
+GOSUB DIRECCION
+set %x #charposx
+set %y #charposy
+click %clickX %clickY
+while %x = #charposx && %y = #charposy
+      {
+      wait 1
+      }
+click %stopX %stopY
+wait 5
+GOSUB PESCA
+;--------------------------------------------------------------------------------------------------------
+SUB CHECKSPERA ;------------------------- CHECKS ESPERA MIENTRAS PESCA ----------------------------------
+GOSUB CURAR
+if #charghost = yes
+   {
+   halt
+   }
+set %submsg #jindex
+for %i 40 0
+    {
+    gosub checksave
+    finditem %enemigos G_1
+    if #findrep = 6  && #finddist < 2
+       {
+       set %enemy #findid
+       finditem %arma C_ , #charid
+       if #findcnt < 1
+          {
+          finditem %arma C_ , #backpackid
+          set #lobjectid #findid
+          event macro 17 0
+          wait 10
+          }
+       finditem %escudo C_ , #charid
+       if #findcnt < 1
+          {
+          finditem %escudo C_ , #backpackid
+          set #lobjectid #findid
+          event macro 17 0
+          wait 5
+          }
+       GOSUB ATTACK
+       break
+       }
+    wait 1
+    }
+return
+;--------------------------------------------------------------------------------------------------------
+SUB WAITFORBICHO ;------------------ ESPERAMOS A QUE SALGA NPC ------------------------------------------
+ignoreitem #charid
+set %ini1 #jindex
+set %ini2 #jindex
+set %timeout #scnt + 60
+waitbicho:
+if #scnt > %timeout
+   {
+   move %xdevuelta %ydevuelta 0 0
+   if %dirdevuelta = 6
+      {
+       event macro 5 7
+      }
+   if %dirdevuelta = 2
+      {
+       event macro 5 3
+      }
+   gosub PESCA
+   }
+gosub checksave
+finditem %enemigos G_4
+set %enemy #findid
+if #findtype = IS && #findid <> #charid
+       {
+       set #ltargetkind 1
+       set #ltargetid #findid
+       event macro 22 0
+       wait 5
+       }
+if #FINDCNT > 0 && #FINDCNT < 3 && #findrep = 6
+       {
+       set #targcurs 0
+       set %enemy #findid
+       GOSUB ATTACK
+       GOSUB PESCA
+       }
+if #FINDCNT >= 3 && #findrep = 6
+       {
+       set %enemy #findid
+       }
+       GOSUB ATTACK
+       GOSUB WAITFORBICHO
+       }
+goto waitbicho
+;--------------------------------------------------------------------------------------------------------
+SUB MALDECIR  ;-------------------------- MALDECIMOS ARMA E IN SAR --------------------------------------
+GOSUB CURAR
+set %xdevuelta #charposx
+set %ydevuelta #charposy
+set %yestrategico ( #charposy + 1 )
+set %dirdevuelta #chardir
+move #charposx %yestrategico 0 0
+finditem %arma C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 5
+set %checki #jindex
+event macro 1 0 .nigro 4
+wait 30
+set %checko #jindex
+for %i %checki %checko
+    {
+    scanjournal %i
+    if conjuro in #journal
+       {
+       event macro 1 0 .nigro 4
+       wait 30
+       }
+    }
+finditem %escudo C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 20
+return
+;--------------------------------------------------------------------------------------------------------
+SUB DURABILIDAD ;-------------------------- COMPROBANDO DURABILIDAD EQUIPO ------------------------------
+event exmsg #charid 3 6000 [DURABILIDAD]
+finditem * C_ , #charid
+for %i #findcnt 1
+    {
+    finditem * C_ , #charid
+    event property #findid
+    str Pos #property $
+    set %until #strres
+    str Left #property %until
+    set %item #strres
+    str Pos #property Durabilidad
+    set %until #strres + 12
+    str Len #property
+    set %total #strres - %until
+    str Right #property %total
+    set %final #strres
+    if %total = 10
+       {
+       str Left %final 3
+       }
+    if %total = 8 || %total = 9
+       {
+       str Left %final 2
+       }
+    if %total = 7
+       {
+       str Left %final 1
+       }
+    if #strres < 10
+       {
+       set %parreglar #findid
+        finditem %cepillos C_ , %bolsa
+        set #lobjectid #findid
+        event macro 17 0
+        target
+        set #ltargetkind 1
+        set #ltargetid %parreglar
+        event macro 22 0
+        wait 1
+        }
+    ignoreitem #findid
+    set #findindex #findindex + 1
+    }
+finditem %arma C_ , #backpackid
+ event property #findid
+    str Pos #property $
+    set %until #strres
+    str Left #property %until
+    set %item #strres
+    str Pos #property Durabilidad
+    set %until #strres + 12
+    str Len #property
+    set %total #strres - %until
+    str Right #property %total
+    set %final #strres
+    if %total = 10
+       {
+       str Left %final 3
+       }
+    if %total = 8 || %total = 9
+       {
+       str Left %final 2
+       }
+    if %total = 7
+       {
+       str Left %final 1
+       }
+    if #strres < 10
+    {
+    set %parreglar #findid
+    finditem %cepillos C_ , %bolsa
+    set #lobjectid #findid
+    event macro 17 0
+    target
+    set #ltargetkind 1
+    set #ltargetid %parreglar
+    event macro 22 0
+    wait 5
+    }
+set %waitdurab ( #scnt + 120 )
+ignoreitem reset
+return
+;--------------------------------------------------------------------------------------------------------
+SUB CURAR ;-------------------------- APLICANDO VENDAS --------------------------------------------------
+if C in #charstatus
+   {
+   set %espera 23
+   }
+if C notin #charstatus
+   {
+   set %espera 18
+   }
+if #hits < #maxhits && #scnt > %tiempovenda
+   {
+   event macro 1 0 .vendas
+   target
+   event macro 23 0
+   event exmsg #charid 3 6000 [CURANDO]
+   set %tiempovenda ( #scnt + %espera )
+   }
+wait 5
+return
+;--------------------------------------------------------------------------------------------------------
+sub checkSave ;-------------------------- SAVE AUTOMÁTICOS ----------------------------------------------
+if #time > 510 && #time < 559 || #time > 13510 && #time < 13559 || #time > 30510 && #time < 30559 || #time > 43510 && #time < 43559 || #time > 60510 && #time < 60559 || #time > 73510 && #time < 73559 || #time > 90510 && #time < 90559 || #time > 103510 && #time < 103559 || #time > 120510 && #time < 120559 || #time > 133510 && #time < 133559 || #time > 150510 && #time < 150559 || #time > 163510 && #time < 163559 || #time > 180510 && #time < 180559 || #time > 193510 && #time < 193559 || #time > 210510 && #time < 210559 || #time > 223510 && #time < 223559
+   {
+   event exmsg #charid 3 6000 [PAUSA: SAVE]
+   wait 90s
+   event exmsg #charid 3 6000 [REANUDANDO]
+   }
+return
+;--------------------------------------------------------------------------------------------------------
+SUB CAMBIO ;------------------------------ LLEGAMOS AL LÍMITE -------------------------------------------
+;--------------------------------------------------------------------------------------------------------
+GOSUB CURAR
+finditem %comida C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+;--------------------------------------------------------------------------------------------------------
+;---------------------------------------- SUBIMOS Y GIRAMOS AL OESTE-------------------------------------
+if %ascendente = 1 && %este = #true
+   {
+   event macro 5 7
+   wait 10
+   set %x #charposx
+   set %y #charposy
+   click %clickNorteX %clickNorteY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 20
+   set %x #charposx
+   set %y #charposy
+   click %clickOesteX %clickOesteY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %este #false
+   return
+   }
+;--------------------------------------------------------------------------------------------------------
+;---------------------------------------- SUBIMOS Y GIRAMOS AL ESTE--------------------------------------
+if %ascendente = 1 && %este = #false
+   {
+   event macro 5 3
+   set %x #charposx
+   set %y #charposy
+   click %clickNorteX %clickNorteY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %x #charposx
+   set %y #charposy
+   click %clickEsteX %clickEsteY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %este #true
+   return
+   }
+;--------------------------------------------------------------------------------------------------------
+;---------------------------------------- BAJAMOS Y GIRAMOS AL OESTE-------------------------------------
+if %ascendente = 0 && %este = #true
+   {
+   event macro 5 7
+   set %x #charposx
+   set %y #charposy
+   click %clickSurX %clickSurY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %x #charposx
+   set %y #charposy
+   click %clickOesteX %clickOesteY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %este #false
+   return
+   }
+;--------------------------------------------------------------------------------------------------------
+;---------------------------------------- BAJAMOS Y GIRAMOS AL ESTE--------------------------------------
+if %ascendente = 0 && %este = #false
+   {
+   event macro 5 3
+   set %x #charposx
+   set %y #charposy
+   click %clickSurX %clickSurY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %x #charposx
+   set %y #charposy
+   click %clickEsteX %clickEsteY
+   while %x = #charposx && %y = #charposy
+         {
+         wait 1
+         }
+   click %stopX %stopY
+   wait 10
+   set %este #true
+   return
+   }
+;--------------------------------------------------------------------------------------------------------
+;--------------------------------------------------------------------------------------------------------
+GOSUB PESCA
+
+SUB END ;--------------------------------- TERMINAR LA MACRO --------------------------------------------
+display Has llegado al límite
+halt

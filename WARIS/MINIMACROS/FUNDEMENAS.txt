@@ -1,0 +1,51 @@
+Set %cofre BCXWNOD
+set %menas TVJ_DWJ_GWJ_EWJ
+Set %lingotes RMK_XMK_TMK_NMK
+Set %cantidad ( ( ( #maxweight - 1 ) - #weight ) / 2 )
+
+set #sysmsgcol 1981
+Event SysMessage Fundemenas (08/01/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+loop:
+wait 5
+finditem %menas C_ , %cofre
+set %pesowait #weight
+exevent drag #findid %cantidad - #findstack
+wait 5
+aguarda:
+exevent dropc C_ , #backpackid
+if #weight <> %pesowait
+   {
+   goto sigue
+   }
+goto aguarda
+sigue:
+wait 5
+set #findstack 1
+set %timewait ( #scnt + 5 )
+  repeat
+      {
+      finditem %menas C_ , #backpackid
+      set #lobjectid #findid
+      event macro 17 0
+      }
+  until #findstack < 1 || #scnt > %timewait
+finditem %lingotes C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+set %pesowait #weight
+set %timewait ( #scnt + 2 )
+espera:
+if #scnt > %timewait
+   {
+   goto sigue
+   }
+exevent dropc %cofre
+if #weight <> %pesowait
+      {
+      goto loop
+      }
+goto espera

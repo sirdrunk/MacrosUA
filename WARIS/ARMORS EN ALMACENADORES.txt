@@ -1,0 +1,632 @@
+;-------------------------------- ID PRINCIPALES --------------------------------------------
+set %cofre BCXWNOD                ; ID del cofre con todos los lingotes en el primer nivel
+set %bolsamartillos NCIIROD       ; ID de la bolsa llena de mazos de herrero
+set %bolsaalmacenadores XNGVLQD   ; ID de la bolsa con almacenadores vacíos
+set %bolsafinal FKWUMQD           ; ID de la bolsa donde dejar los almacenadores completos
+
+;-------------------------------- TYPE GENÉRICOS ------------------------------------------
+set %martillo GBG
+set %bod TVH_EWH
+set %lingotes RMK
+set %almacenador IUD_LKF
+
+;-------------------------------- CLICKS GENÉRICOS ------------------------------------------
+
+set %mineralx 70          ; X del botón para cambiar mineral
+set %mineraly 450         ; Y del botón para cambiar mineral
+
+set %cambiopagx 435       ; X del botón de cambio de página ("SIGUIENTE") en el menú herrero dentro de cambiar mineral
+set %cambiopagy 350       ; Y del botón de cambio de página ("SIGUIENTE") en el menú herrero dentro de cambiar mineral
+
+set %fabultimox 325       ; X del botón FABRICAR ULTIMO
+set %fabultimoy 495       ; Y del botón FABRICAR ULTIMO
+
+set %placasx 70           ; X del botón "Coraza de Placas" del menú herrero
+set %placasy 130          ; Y del botón "Coraza de Placas" del menú herrero
+
+set %piezax 270           ; X común de todos los botones para fabricar cada pieza de armor
+set %corazay 210          ; Y del botón "Coraza"
+set %grebasy 190          ; Y del botón "Grebas"
+set %brazalesy 170        ; Y del botón "Brazales"
+set %cascoy 150           ; Y del botón "Casco"
+set %guantesy 130         ; Y del botón "Guantes"
+set %collariny 110        ; Y del botón "Collarin"
+
+set %materialx 270        ; X común a los botones de cada mineral
+set %broncey 170          ; Y del botón de cada mineral:
+set %aceroy 190           ; ACERO
+set %mithrily 230         ; MITHRIL
+set %rosay 250            ; ROSE
+set %agapitey 270         ; AGAPITE
+set %veritey 290          ; VERITE
+set %valoritey 310        ; VALORITE
+set %rocasangrey 130      ; ROCA DE SANGRE
+set %rocanegray 150       ; ROCA NEGRA
+set %aquay 170            ; AQUA
+set %cristalinoy 190      ; CRISTALINO
+set %nievey 210           ; NIEVE
+set %litiumy 230          ; LITHIUM
+set %adamantiumy 250      ; ADAMANTIUM
+set %skyy 270             ; SKY
+set %kriptonitay 290      ; KRIPTONITA
+set %volcany 310          ; VOLCAN
+set %lunary 130           ; LUNAR
+set %acidoy 150           ; ACIDO
+set %hieloy 170           ; HIELO
+set %titany 190           ; TITAN
+set %dragony 210          ; DRAGÓN
+set %eclipsey 230         ; ECLIPSE
+
+set #sysmsgcol 1981
+Event SysMessage Armor en almacenadores (27/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+gosub menuDetener
+
+;-------------------------------------------- MENU DETENER -------------------------------------
+
+sub menuDetener
+
+finditem RMK C_ , #backpackid
+exevent drag #findid #findstack
+wait 5
+exevent dropc %cofre
+wait 15
+
+menu clear
+set #menubutton DETENER
+menu font bgcolor $2E3946
+menu font size 10
+menu show 650 700
+menu window size 500 130
+menu window title Discord: warisahluwalia
+menu window color $424D5C
+menu font name Arial
+menu font align center
+menu font bgcolor $2E3946
+menu font color $6BB6E6
+menu font style b
+menu button titmenu 0 0 500 20 -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-· ELIGE EL MINERAL ·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-
+menu font color white
+menu font size 7
+menu font name Arial
+menu font align center
+menu font bgcolor $2E638F
+menu button BRONCE 0 30 100 20 BRONCE
+menu font bgcolor $9E8BAD
+menu button ROSA 100 30 100 20 ROSA
+menu font bgcolor $B5B5B5
+menu font color black
+menu button ACERO 200 30 100 20 ACERO
+menu font color white
+menu font bgcolor $6B3722
+menu button MYTRHIL 300 30 100 20 MYTRHIL
+menu font bgcolor $73708A
+menu button AGAPITE 400 30 100 20 AGAPITE
+menu font bgcolor $6CABAD
+menu button VERITE 0 50 100 20 VERITE
+menu font bgcolor $6B5848
+menu button VALORITE 100 50 100 20 VALORITE
+menu font bgcolor $30305E
+menu button BLOODROCK 200 50 100 20 BLOODROCK
+menu font bgcolor $303030
+menu button BLACKROCK 300 50 100 20 BLACKROCK
+menu font bgcolor $6B485D
+menu button AQUA 400 50 100 20 AQUA
+menu font bgcolor $8A6D33
+menu button CRISTALINO 0 70 100 20 CRISTALINO
+menu font bgcolor $EDEDED
+menu font color black
+menu button NIEVE 100 70 100 20 NIEVE
+menu font color white
+menu font bgcolor $6B335A
+menu button LITHIUM 200 70 100 20 LITHIUM
+menu font bgcolor $191966
+menu button ADAMANTIUM 300 70 100 20 ADAMANTIUM
+menu font bgcolor $665C19
+menu button SKY 400 70 100 20 SKY
+menu font bgcolor $827D19
+menu button KRIPTONITA 0 90 100 20 KRIPTONITA
+menu font bgcolor $205FB3
+menu button VOLCAN 100 90 100 20 VOLCÁN
+menu font bgcolor $22A1A1
+menu button LUNAR 200 90 100 20 LUNAR
+menu font bgcolor $4AB82C
+menu button ACIDO 300 90 100 20 ÁCIDO
+menu font bgcolor $B8AC2C
+menu button HIELO 400 90 100 20 HIELO
+menu font bgcolor $136770
+menu button TITAN 0 110 100 20 TITÁN
+menu font bgcolor $1C4723
+menu button DRAGON 100 110 100 20 DRAGÓN
+menu font bgcolor $5E5E5E
+menu button ECLIPSE 200 110 100 20 ECLIPSE
+menu font bgcolor $23FF00
+menu font color RED
+menu button INICIAR 300 110 200 20 INICIAR
+; menu font color BLACK
+; menu font bgcolor BLACK
+; menu button DETENER 400 110 100 20 DETENER
+
+set #menubutton nothing
+goto esperaAccion
+
+;------------------------------------ POSIBLES MINERALES ---------------------------------------------
+
+esperaAccion:
+
+if #menubutton = BRONCE
+{
+set %mineral bronce
+set %color 1750
+set %materialy %broncey
+set %pag 1
+}
+if #menubutton = ROSA
+{
+set %mineral rosa
+set %color 1637
+set %materialy %rosay
+set %pag 1
+}
+if #menubutton = ACERO
+{
+set %mineral acero
+set %color 901
+set %materialy %aceroy
+set %pag 1
+}
+if #menubutton = MYTHRIL
+{
+set %mineral mithril
+set %color 1325
+set %materialy %mithrily
+set %pag 1
+}
+if #menubutton = AGAPITE
+{
+set %mineral agapite
+set %color 1024
+set %materialy %agapitey
+set %pag 1
+}
+if #menubutton = VERITE
+{
+set %mineral verite
+set %color 2001
+set %materialy %veritey
+set %pag 1
+}
+if #menubutton = VALORITE
+{
+set %mineral valorite
+set %color 1301
+set %materialy %valoritey
+set %pag 1
+}
+if #menubutton = BLOODROCK
+{
+set %mineral bloodrock
+set %color 1218
+set %materialy %rocasangrey
+set %pag 2
+}
+if #menubutton = BLACKROCK
+{
+set %mineral blackrock
+set %color 1109
+set %materialy %rocanegray
+set %pag 2
+}
+if #menubutton = AQUA
+{
+set %mineral aqua
+set %color 10
+set %materialy %aquay
+set %pag 2
+}
+if #menubutton = NIEVE
+{
+set %mineral nieve
+set %color 1153
+set %materialy %nievey
+set %pag 2
+}
+if #menubutton = CRISTALINO
+{
+set %mineral cristalino
+set %color 101
+set %materialy %cristalinoy
+set %pag 2
+}
+if #menubutton = LITHIUM
+{
+set %mineral litium
+set %color 622
+set %materialy %litiumy
+set %pag 2
+}
+if #menubutton = ADAMANTIUM
+{
+set %mineral adamantium
+set %color 39
+set %materialy %adamantiumy
+set %pag 2
+}
+if #menubutton = SKY
+{
+set %mineral sky
+set %color 91
+set %materialy %skyy
+set %pag 2
+}
+if #menubutton = KRIPTONITA
+{
+set %mineral kriptonita
+set %color 1926
+set %materialy %kriptonitay
+set %pag 2
+}
+if #menubutton = VOLCAN
+{
+set %mineral volcan
+set %color 1925
+set %materialy %volcany
+set %pag 2
+}
+if #menubutton = LUNAR
+{
+set %mineral lunar
+set %color 53
+set %materialy %lunary
+set %pag 3
+}
+if #menubutton = ACIDO
+{
+set %mineral acido
+set %color 1927
+set %materialy %acidoy
+set %pag 3
+}
+if #menubutton = HIELO
+{
+set %mineral hielo
+set %color 1152
+set %materialy %hieloy
+set %pag 3
+}
+if #menubutton = TITAN
+{
+set %mineral titan
+set %color 1944
+set %materialy %titany
+set %pag 3
+}
+if #menubutton = DRAGON
+{
+set %mineral dragon
+set %color 1941
+set %materialy %dragony
+set %pag 3
+}
+if #menubutton = ECLIPSE
+{
+set %mineral eclipse
+set %color 1953
+set %materialy %eclipsey
+set %pag 3
+}
+if #menubutton = INICIAR && %mineral <> 0
+{
+gosub menuIniciar
+}
+goto esperaAccion
+
+sub menuIniciar
+
+set #menubutton INICIAR
+
+menu show 650 700
+menu window size 500 130
+menu window title Discord: warisahluwalia
+menu window color $424D5C
+menu font name Arial
+menu font align center
+menu font bgcolor $2E3946
+menu font color $6BB6E6
+menu font style b
+menu button titmenu 0 0 500 20 -·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-· FABRICANDO... ·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-·-
+menu font bgcolor $0000FF
+menu font color BLACK
+menu font size 15
+menu button DETENER 0 20 500 110 DETENER
+menu window color $424D5C
+
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+
+gosub preparar
+
+sub preparar ;---------------------------------- FABRICAR -----------------------------------------------
+
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+gosub checksave
+ignoreitem reset
+
+nextcpos 800 20
+set #lobjectid %cofre
+event macro 17 0
+wait 10
+nextcpos 770 280
+set #lobjectid %bolsamartillos
+event macro 17 0
+wait 10
+nextcpos 1000 20
+set #lobjectid %bolsaalmacenadores
+event macro 17 0
+wait 10
+nextcpos 1000 280
+set #lobjectid %bolsafinal
+event macro 17 0
+wait 10
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+finditem RMK C_ , #backpackid
+if #findcnt < 1
+   {
+   finditem RMK C_ , %cofre
+   for %i #findcnt 1
+        {
+        finditem RMK C_ , %cofre
+        if #findcol = %color
+           {
+           exevent drag #findid 1 - #findstack
+           wait 5
+           exevent dropc #backpackid
+           wait 20
+           break
+           }
+        ignoreitem #findid
+        set #findindex ( #findindex + 1 )
+        }
+   }
+finditem GBG C_ , #charid
+if #findcnt < 1
+   {
+   finditem GBG C_ , #backpackid
+   if #findcnt < 1
+      {
+      event exmsg #charid 3 6000 [Reponiendo mazo]
+      gosub reponer %martillo %bolsamartillos
+      }
+   finditem GBG C_ , #backpackid
+   set #lobjectid #findid
+   event macro 17 0
+   wait 5
+   }
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+event exmsg #charid 3 6000 Selecciono mineral...
+finditem RMK C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 10
+click %mineralx %mineraly
+wait 10
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+if %pag > 1
+   {
+   for %i %pag 2
+       {
+       click %cambiopagx %cambiopagy
+       wait 10
+       }
+   }
+click %materialx %materialy
+wait 10
+gosub check
+
+sub check  ;--------------------------------- CHECK SI TENEMOS LAS PIEZAS -------------------------------------
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+gosub checksave
+finditem GBG C_ , #charid
+if #findcnt < 1
+   {
+   finditem GBG C_ , #backpackid
+   if #findcnt < 1
+      {
+      event exmsg #charid 3 6000 [Reponiendo mazo]
+      gosub reponer %martillo %bolsamartillos
+      }
+   finditem GBG C_ , #backpackid
+   set #lobjectid #findid
+   event macro 17 0
+   wait 5
+   event macro 17 0
+   target
+   finditem RMK C_ , #backpackid
+   set #lobjectid #findid
+   event macro 17 0
+   wait 10
+   }
+finditem HSH C_ , #backpackid
+if #findcnt < 1
+   {
+   gosub fabricar %piezax %corazay 25
+   }
+finditem LSH C_ , #backpackid
+if #findcnt < 1
+   {
+   gosub fabricar %piezax %grebasy 20
+   }
+finditem MSH C_ , #backpackid
+if #findcnt < 1
+   {
+   gosub fabricar %piezax %brazalesy 18
+   }
+finditem OSH C_ , #backpackid
+if #findcnt < 1
+   {
+   gosub fabricar %piezax %cascoy 15
+   }
+finditem ISH C_ , #backpackid
+if #findcnt < 1
+   {
+   gosub fabricar %piezax %guantesy 12
+   }
+finditem NSH C_ , #backpackid
+if #findcnt < 1
+   {
+   gosub fabricar %piezax %collariny 10
+   }
+finditem %almacenador C_ , #backpackid
+if #findcnt < 1
+   {
+   event exmsg #charid 3 6000 [Pillando almacenador]
+   gosub reponer %almacenador %bolsaalmacenadores
+   }
+finditem %almacenador C_ , #backpackid
+set %actual #findid
+gosub rellenar HSH
+gosub rellenar LSH
+gosub rellenar MSH
+gosub rellenar OSH
+gosub rellenar ISH
+gosub rellenar NSH
+
+exevent drag %actual
+wait 5
+exevent dropc %bolsafinal
+wait 20
+gosub check
+
+sub reponer ;--------------------------------- REPONER -------------------------------------
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+gosub checksave
+finditem %2 C_ , %cofre
+set #lobjectid #findid
+event macro 17 0
+wait 10
+finditem %1 C_ , %2
+if #findcnt < 1
+   {
+   display Faltan materiales
+   halt
+   }
+exevent drag #findid
+wait 5
+exevent dropc #backpackid
+wait 20
+return
+
+sub rellenar ;--------------------------------- RELLENAR ALMACENADORES -------------------------------------
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+gosub checksave
+finditem %1 C_ , #backpackid
+exevent drag #findid
+wait 5
+exevent dropc %actual
+wait 15
+return
+
+sub fabricar  ;--------------------------------- FABRICAR PIEZAS -------------------------------------
+finditem GBG C_ , #charid
+if #findcnt < 1
+   {
+   finditem GBG C_ , #backpackid
+   if #findcnt < 1
+      {
+      event exmsg #charid 3 6000 [Reponiendo mazo]
+      gosub reponer %martillo %bolsamartillos
+      }
+   finditem GBG C_ , #backpackid
+   set #lobjectid #findid
+   event macro 17 0
+   wait 5
+   event macro 17 0
+   target
+   finditem RMK C_ , #backpackid
+   set #lobjectid #findid
+   event macro 17 0
+   wait 10
+   }
+if ( #weight + ( %3 * 2 ) + 2 ) > #maxweight
+   {
+   display Demasiado peso en la mochila. No puedo coger los lingotes. La macro se va a pausar. Puedes darle al play si liberas carga.
+   pause
+   }
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+finditem RMK C_ , #backpackid
+if #findcnt > 0
+   {
+   set %qlingotes ( %3 - #findstack )
+   }
+else
+   {
+   set %qlingotes %3
+   }
+if #findcnt < 1 || #findstack < %3
+   {
+   finditem RMK C_ , %cofre
+   for %i #findcnt 1
+        {
+        finditem RMK C_ , %cofre
+        if #findcol = %color
+           {
+           exevent drag #findid %qlingotes - #findstack
+           wait 5
+           exevent dropc #backpackid
+           wait 20
+           break
+           }
+        ignoreitem #findid
+        set #findindex ( #findindex + 1 )
+        }
+   }
+click %placasx %placasy
+wait 10
+click %1 %2
+wait 40
+gosub checksave
+gosub check
+
+;--------------------------------------------------------------------------------------------------------
+sub checkSave ;-------------------------- SAVE AUTOMÁTICOS ----------------------------------------------
+if #menubutton = DETENER
+   {
+   gosub menuDetener
+   }
+if #time > 510 && #time < 559 || #time > 13510 && #time < 13559 || #time > 30510 && #time < 30559 || #time > 43510 && #time < 43559 || #time > 60510 && #time < 60559 || #time > 73510 && #time < 73559 || #time > 90510 && #time < 90559 || #time > 103510 && #time < 103559 || #time > 120510 && #time < 120559 || #time > 133510 && #time < 133559 || #time > 150510 && #time < 150559 || #time > 163510 && #time < 163559 || #time > 180510 && #time < 180559 || #time > 193510 && #time < 193559 || #time > 210510 && #time < 210559 || #time > 223510 && #time < 223559
+   {
+   event exmsg #charid 3 6000 [PAUSA: SAVE]
+   wait 90s
+   event exmsg #charid 3 6000 [REANUDANDO]
+   }
+return
+

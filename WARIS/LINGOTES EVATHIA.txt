@@ -1,0 +1,305 @@
+; -------------------- CONFIGURACIÓN ------------------------
+
+; DEBES TENER JOYAS, PICO MÁGICO Y DEMÁS EQUIPADO ANTES DE EMPEZAR LA MACRO Y MANZANAS EN LA MOCHILA
+
+set %bolsapesado SKIFLQD ; Bolsa con lingotes de cobre pesado
+set %bolsahierro ELIFLQD ; Bolsa con lingotes de hierro
+set %bolsaazufre XGIFLQD ; Bolsa con azufre
+set %bolsafinal BCXWNOD ; Bolsa donde quieres que deje los lingotes de evathia si no quieres entregarlos
+set %cofre BCXWNOD ; COFRE QUE CONTIENE LAS 3 BOLSAS Y REGS DE RECALL SUELTOS
+set %comida QQD ; Type de la comida que llevarás en la mochila, QQD para manzanas
+set %librorunas APVPCPD ; ID del libro de runas con runa a la mina y a casa
+set %runamina 7 ; posición de la runa de la mina en el libro (lo más cerca posible de la forja de Evathia)
+set %runacasa 14 ; posición de la runa de la casa (frente al cofre con todo lo necesario)
+
+; ------------------ NO LO TOQUES, KIMERA ----------------------
+set %minero IS_HS
+set %maxpeso #maxweight - ( %qlingotes * 37 ) + 1
+set %mr MZF
+set %bm JUF
+set %bp KUF
+
+set %qlingotes ( ( #maxweight - #weight ) / 37 )
+set %qhierro ( %qlingotes * 12 )
+set %qpesado ( %qlingotes * 6 )
+set %qazufre ( %qlingotes * 3 )
+
+set #sysmsgcol 1981
+Event SysMessage Lingotes Evathia (04/08/2022)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+display yesno ¿Quieres que este personaje entregue los lingotes?
+if #dispres = yes
+{
+set %desenlace 1
+gosub reponer
+}
+set %desenlace 2
+gosub reponer
+
+SUB DEJAR
+
+finditem %cofre G_
+set #lobjectid #findid
+event macro 17 0
+wait 10
+
+gosub checkSave
+
+finditem RMK C_ , #backpackid
+if #findcol = 43
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %bolsafinal
+wait 15
+gosub REPONER
+}
+if #findcol = 0
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %bolsahierro
+wait 15
+}
+if #findcol = 1546
+{
+exevent drag #findid #findstack
+wait 5
+exevent dropc %bolsapesado
+wait 15
+}
+if  #findcnt < 1
+{
+gosub REPONER
+}
+
+gosub DEJAR
+
+
+SUB REPONER
+
+event macro 13 46
+
+gosub peso
+
+finditem %cofre G_
+set #lobjectid #findid
+event macro 17 0
+wait 10
+
+finditem %mr C_ , #backpackid
+if #findstack < 5
+{
+finditem %mr C_ , %cofre
+exevent drag #findid 10 - #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+}
+finditem %bp C_ , #backpackid
+if #findstack < 5
+{
+finditem %bp C_ , %cofre
+exevent drag #findid 10 - #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+}
+finditem %bm C_ , #backpackid
+if #findstack < 5
+{
+finditem %bm C_ , %cofre
+exevent drag #findid 10 - #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+}
+
+finditem %bolsahierro C_ , %cofre
+set #lobjectid #findid
+event macro 17 0
+wait 10
+finditem RMK C_ , %bolsahierro
+if #findstack < %qhierro
+{
+display NO HAY SUFICIENTE HIERRO
+HALT
+}
+exevent drag #findid %qhierro - #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+
+finditem %bolsapesado C_ , %cofre
+set #lobjectid #findid
+event macro 17 0
+wait 10
+finditem RMK C_ , %bolsapesado
+if #findstack < %qpesado
+{
+display NO HAY SUFICIENTE COBRE PESADO
+HALT
+}
+exevent drag #findid %qpesado - #findstack
+wait 5
+exevent dropc #backpackid
+wait 15
+
+finditem FUF C_ , #backpackid
+set  %azufrefaltante %qazufre - #findstack
+finditem %bolsaazufre C_ , %cofre
+set #lobjectid #findid
+event macro 17 0
+wait 10
+finditem FUF C_ , %bolsaazufre
+if #findstack < %qazufre
+{
+display NO HAY SUFICIENTE AZUFRE
+HALT
+}
+exevent drag #findid %azufrefaltante
+wait 5
+exevent dropc #backpackid
+wait 15
+gosub checkSave
+
+gosub recalmina
+
+SUB RECALMINA
+
+if %runamina <= 8
+{
+    set %runax 130
+    set %runay 55 + ( %runamina * 15 )
+}
+
+if %runamina > 8
+{
+    set %runax 290
+    set %runay 55 + ( ( %runamina - 8 ) * 15 )
+}
+
+finditem %librorunas C_ , #BACKPACKID
+set #lobjectid #findid
+event macro 17 0
+wait 10
+click %runax %runay f
+wait 11s
+
+gosub checkSave
+
+gosub fundir
+
+SUB RECALCASA
+
+   if %runacasa <= 8
+{
+    set %runax 130
+    set %runay 55 + ( %runacasa * 15 )
+}
+
+    if %runacasa > 8
+{
+    set %runax 290
+    set %runay 55 + ( ( %runacasa - 8 ) * 15 )
+}
+
+
+finditem %librorunas C_ , #BACKPACKID
+set #lobjectid #findid
+event macro 17 0
+wait 10
+click %runax %runay f
+wait 11s
+
+gosub checkSave
+
+gosub DEJAR
+
+SUB FUNDIR
+
+move 1234 1252 0 0
+finditem %comida C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+finditem JBG G_
+set #lobjectid #findid
+for %i 1 %qlingotes
+{
+event macro 17 0
+}
+
+if %desenlace = 1
+{
+gosub checkSave
+gosub entregar
+}
+if %desenlace = 2
+{
+gosub checkSave
+gosub recalcasa
+}
+
+SUB ENTREGAR
+
+gosub checkSave
+_find_minero:
+finditem %minero G_15
+if #findcnt < 1
+{
+  wait 10s
+  goto _find_minero
+}
+event property #findid
+if Amicito notin #property
+{
+  ignoreitem #findid
+  goto _find_vendor
+}
+set %amicito #findid
+move #findx #findy 1 0
+
+_lingote_evathia:
+finditem RMK C_ , #backpackid
+if #findcol = 0 || #findcol = 1546
+{
+ignoreitem #findid
+set #findindex #findindex + 1
+goto _lingote_evathia
+}
+exevent drag #findid #findstack
+wait 5
+exevent dropc %amicito
+wait 15
+gosub checkSave
+gosub recalcasa
+
+sub peso
+
+if #weight >= %maxpeso
+{
+display NECESITAS CARGAR CON MENOS PESO PARA INICIAR LA MACRO
+halt
+}
+RETURN
+
+sub checkSave
+if #time > 510 && #time < 559 || #time > 13510 && #time < 13559 || #time > 30510 && #time < 30559 || #time > 43510 && #time < 43559 || #time > 60510 && #time < 60559 || #time > 73510 && #time < 73559 || #time > 90510 && #time < 90559 || #time > 103510 && #time < 103559 || #time > 120510 && #time < 120559 || #time > 133510 && #time < 133559 || #time > 150510 && #time < 150559 || #time > 163510 && #time < 163559 || #time > 180510 && #time < 180559 || #time > 193510 && #time < 193559 || #time > 210510 && #time < 210559 || #time > 223510 && #time < 223559
+{
+gosub waitForSave
+set #sysmsgcol 1995
+}
+return
+
+sub waitForSave
+wait 1s
+gosub checkSave
+
+
+
+
+
+

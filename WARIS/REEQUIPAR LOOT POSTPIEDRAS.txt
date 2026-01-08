@@ -1,0 +1,47 @@
+; TIENES QUE DARLE AL PLAY ANTES DE USAR LAS PIEDRAS DEL ALMA
+; CUIDADO QUE BASTONES Y COSAS ASÍ QUE NO TE DEJA EQUIPAR SIN EQUIPARTE PRIMERO CAPA DE MAGO PUEDEN DAR PROBLEMAS
+
+set %hotkey F8 ;<-------------------- elige la tecla
+
+set #sysmsgcol 1981
+Event SysMessage Reequiparte loot desde mochila (28/09/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwalia
+
+set %items 0
+finditem * C_ , #charid
+set %findcnt #findcnt
+for %i #findcnt 1
+    {
+    finditem * C_ , #charid
+    set %items %items , _ , #findid
+    ignoreitem #findid
+    set #findindex #findindex + 1
+    }
+ignoreitem reset
+event exmsg #charid 3 6000 Pulsa %hotkey para reequipar
+goto reequipar
+
+reequipar:
+onhotkey %hotkey
+         {
+         for %i %findcnt 2
+             {
+             finditem %items C_ , #backpackid
+             if QMH in #findtype || CQF in #findtype
+                {
+                ignoreitem #findid
+                }
+             else
+                {
+                exevent drag #findid
+                wait 5
+                exevent droppd
+                wait 15
+                }
+             }
+         event exmsg #charid 3 6000 ¡Reequipado!
+         }
+goto reequipar
+

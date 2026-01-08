@@ -1,0 +1,176 @@
+set #sysmsgcol 1981
+Event SysMessage Buscaitems (27/08/2025)
+set #sysmsgcol 1946
+Event SysMessage Discord: warisahluwalia
+gosub menu
+
+sub menu
+menu show 512 700
+menu window size 300 102
+menu window title Buscaitems 1.0
+menu window color black
+menu font name Arial
+menu font align center
+menu font bgcolor blue
+menu font color white
+menu font style b
+menu button titmenu 0 0 300 20 PROPIEDADES A BUSCAR
+menu font bgcolor black
+menu font style
+menu font color white
+menu font size 12
+menu font align left
+menu text Prop1 0 22 Propiedad 1:
+menu font size 8
+menu edit Propiedad1 100 20 100
+menu font size 12
+menu font align left
+menu text Prop2 0 42 Propiedad 2:
+menu font size 8
+menu edit Propiedad2 100 40 100
+menu font size 12
+menu font align left
+menu text Prop3 0 62 Propiedad 3:
+menu font size 8
+menu edit Propiedad3 100 60 100
+menu font size 12
+menu font align left
+menu font bgcolor black
+menu text Col 0 82 Color:
+menu font size 8
+menu edit Color 100 80 100
+menu font name Arial
+menu font align center
+menu font bgcolor red
+menu button Buscar 228 30 50 25 BUSCAR
+menu font size 8
+menu font name Arial
+menu font align center
+menu font bgcolor red
+menu button Bolsa 228 60 50 25 BOLSA
+set #menubutton nothing
+gosub esperaAccion
+
+sub esperaAccion
+
+loopCheck:
+
+if
+if #menubutton = Buscar
+{
+gosub buscar
+}
+if #menubutton = Bolsa
+{
+gosub bolsa
+}
+
+goto loopCheck
+
+sub bolsa
+set #targcurs 1
+repeat
+wait 1
+until #targcurs = 0
+set %bolsa #ltargetid
+event exmsg %bolsa 3 6000 Bolsa seleccionada
+set #lobjectid %bolsa
+nextcpos 590 450
+event macro 17 0
+wait 10
+set #menubutton nothing
+gosub esperaAccion
+
+sub buscar
+set %prop1 0
+set %prop2 0
+set %prop3 0
+set %color 0
+ignoreitem reset
+menu get Propiedad1
+set %prop1 #menures
+str len #menures
+if #strres < 1
+{
+set %prop1 #false
+}
+menu get Propiedad2
+set %prop2 #menures
+str len #menures
+if #strres < 1
+{
+set %prop2 #false
+}
+menu get Propiedad3
+set %prop3 #menures
+str len #menures
+if #strres < 1
+{
+set %prop3 #false
+}
+menu get Color
+set %color #menures
+str len #menures
+if #strres < 1
+{
+set %color #false
+}
+finditem * C_ , %bolsa
+for %i #findcnt 1
+{
+finditem * C_ , %bolsa
+event property #findid
+      if %prop1 in #property && %prop2 = 0 && %prop3 = 0 && %color = 0
+      {
+      exevent drag #findid
+      wait 5
+      exevent dropc #backpackid
+      wait 15
+      event exmsg #findid 3 170 Encontrado!
+      }
+            if %prop1 in #property && %prop2 in #property && %prop1 <> 0 && %prop2 <> 0 && %prop3 = 0 && %color = 0
+            {
+            exevent drag #findid
+            wait 5
+            exevent dropc #backpackid
+            wait 15
+            event exmsg #findid 3 170 Encontrado!
+            }
+                  if %prop1 in #property && %prop2 in #property && %prop3 in #property && %color = 0 && %prop1 <> 0 && %prop2 <> 0 && %prop3 <> 0
+                  {
+                  exevent drag #findid
+                  wait 5
+                  exevent dropc #backpackid
+                  wait 15
+                  event exmsg #findid 3 170 Encontrado!
+                  }
+                              if %prop1 in #property && %prop2 in #property && %prop3 in #property && %color = #findcol && %prop1 <> 0 && %prop2 <> 0 && %prop3 <> 0 && %color <> 0
+                              {
+                              exevent drag #findid
+                              wait 5
+                              exevent dropc #backpackid
+                              wait 15
+                              event exmsg #findid 3 170 Encontrado!
+                              }
+                                    if %prop1 in #property && %prop2 = 0 && %prop3 = 0 && %color = #findcol && %prop1 <> 0 && %color <> 0
+                                    {
+                                    exevent drag #findid
+                                    wait 5
+                                    exevent dropc #backpackid
+                                    wait 15
+                                    event exmsg #findid 3 170 Encontrado!
+                                    }
+                                          if %prop1 in #property && %prop2 in #property && %prop3 = 0 && %color = #findcol && %prop1 <> 0 && %prop2 <> 0 && %color <> 0
+                                          {
+                                          exevent drag #findid
+                                          wait 5
+                                          exevent dropc #backpackid
+                                          wait 15
+                                          event exmsg #findid 3 170 Encontrado!
+                                          }
+ignoreitem #findid
+set #findindex #findindex + 1
+}
+event exmsg #charid 3 6000 LISTO!
+set #menuButton Nothing
+gosub esperaAccion

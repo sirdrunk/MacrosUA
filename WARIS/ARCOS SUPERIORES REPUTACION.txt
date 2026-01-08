@@ -1,0 +1,154 @@
+;--------------------------------------------------------------------------------------------------------
+; En esta macro me he molestado en que no tengas que configurar nada. Sin embargo:
+; Asegúrate de que tus coordenadas de ratón coincidan con las indicadas para el botón de "Fabricar último" del menú de bowcraft
+; Puedes modificar las coordenadas X e Y de ratón justo aquí debajo:
+
+set %xbutton 328
+set %ybutton 496
+
+;--------------------------------------------------------------------------------------------------------
+
+set #targcurs 1
+display Selecciona el cofre con todos los materiales: $$
++ · Un montón de cajitas para rellenar con arcos $
++ · Una bolsa o contenedor lleno de dagas $
++ · Los troncos en el primer nivel del cofre $
++ · Una bolsa o contenedor donde dejar las cajitas terminadas
+while #targcurs = 1
+      {
+      wait 1
+      }
+set %cofre #ltargetid
+set #lobjectid %cofre
+event macro 17 0
+wait 5
+set #targcurs 1
+display Selecciona el contenedor donde dejar las cajitas llenas de arcos
+while #targcurs = 1
+      {
+      wait 1
+      }
+set %bolsafinal #ltargetid
+set #lobjectid %bolsafinal
+event macro 17 0
+wait 5
+set #targcurs 1
+display Selecciona el contenedor con las dagas
+while #targcurs = 1
+      {
+      wait 1
+      }
+set %bolsadagas #ltargetid
+set #lobjectid %bolsadagas
+event macro 17 0
+wait 5
+
+display Fabrica un arco superior a mano y luego dale al play de nuevo a la macro.
+pause
+
+set %madera ZLK         ; Type de los troncos
+set %daga TSF           ; Type de las dagas
+set %cajita IUD_LKF     ; TYPE genérico de las CAJITAS que van a estar vacías
+set %arco TOH           ; Type de los arcos
+set %manzanas QQD       ; Type de la comida que quieras que coma, lo llamo manzanas que yo siempre lo hago con eso
+
+set #sysmsgcol 1981
+Event SysMessage Arcos para Elfos Oscuros (02/12/2025)
+set #sysmsgcol 1946
+Event SysMessage Autor: Waris Ahluwalia
+Event SysMessage Discord: warisahluwaliaa
+gosub fabricar
+
+;--------------------------------------------------------------------------------------------------------
+SUB FABRICAR ; ------------------------------------------------------------------------------------------
+
+finditem %manzanas C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+finditem %madera C_ , #backpackid
+if #findstack < 8
+{
+gosub madera
+}
+finditem %daga C_ , #charid
+if #findstack < 1
+{
+gosub dagas
+}
+finditem %daga C_ , #charid
+set #lobjectid #findid
+event macro 17 0
+target
+finditem %madera C_ , #backpackid
+set #ltargetkind 1
+set #ltargetid #findid
+event macro 22 0
+click %xbutton %ybutton f                  ; <--------- Coordenadas del botón "FABRICAR ULTIMO" del menú de bowcraft
+finditem %arco C_ , #backpackid
+for %i #findcnt 0
+ {
+ finditem %arco C_ , #backpackid
+ exevent drag #findid
+ wait 5
+ finditem %cajita C_ , %cofre
+ exevent dropc #findid
+ wait 15
+ }
+finditem %cajita C_ , %cofre
+event property #findid
+if 715 in #property && 255 in #property
+   {
+   gosub cajitas
+   }
+gosub checksave
+gosub fabricar
+
+
+SUB DAGAS ; --------------------------------------------------------------------------------------
+
+finditem %daga C_ , #backpackid
+if #findstack < 1
+   {
+   finditem %daga C_ , %bolsadagas
+   exevent drag #findid
+   wait 5
+   exevent dropc #backpackid
+   wait 30
+   }
+finditem %daga C_ , #backpackid
+set #lobjectid #findid
+event macro 17 0
+wait 10
+gosub checksave
+return
+
+SUB MADERA ; ---------------------------------------------------------------------------------------
+
+set %cantidad ( ( ( #maxweight - #weight - 4 ) / 2 ) )
+finditem %madera C_ , %cofre
+exevent drag #findid %cantidad - #findstack
+wait 10
+exevent dropc #backpackid
+wait 15
+gosub checksave
+return
+
+SUB CAJITAS ; --------------------------------------------------------------------------------------
+
+finditem %cajita C_ , %cofre
+exevent drag #findid
+wait 5
+exevent dropc %bolsafinal
+wait 20
+return
+
+;--------------------------------------------------------------------------------------------------------
+sub checkSave ;-------------------------- SAVE AUTOMÁTICOS ----------------------------------------------
+if #time > 510 && #time < 559 || #time > 13510 && #time < 13559 || #time > 30510 && #time < 30559 || #time > 43510 && #time < 43559 || #time > 60510 && #time < 60559 || #time > 73510 && #time < 73559 || #time > 90510 && #time < 90559 || #time > 103510 && #time < 103559 || #time > 120510 && #time < 120559 || #time > 133510 && #time < 133559 || #time > 150510 && #time < 150559 || #time > 163510 && #time < 163559 || #time > 180510 && #time < 180559 || #time > 193510 && #time < 193559 || #time > 210510 && #time < 210559 || #time > 223510 && #time < 223559
+   {
+   event exmsg #charid 3 6000 [PAUSA: SAVE]
+   wait 65s
+   event exmsg #charid 3 6000 [REANUDANDO]
+   }
+return
+
