@@ -1,0 +1,62 @@
+/**
+ * Configuration IDs and parameters
+ */
+const bandagesID = 3617;
+const dirtyBandagesID = 3616;
+const waterContainerID = 4104
+const waterContainer = client.findType(waterContainerID, undefined, player.backpack) as Item;
+
+const maxHit = 99;
+const minBandages = 0;
+
+const goingToHealMsg = "Te aplicas las vendas";
+const successHealedMsg = "Te curas a ti mismo"
+
+/**
+ *  Helper functions
+ */
+const heal = (bandages) => {
+  player.use(bandages.serial)
+  target.wait()
+  target.entity(player)
+
+  console.log("Going to heal")
+
+  journal.clear()
+  if (journal.waitForText(goingToHealMsg, "System", 8000)) {
+    journal.clear()
+    if (journal.waitForText(successHealedMsg, "System", 25000)) {
+      console.log("Heal restored");
+      return
+    }
+  } else {
+    heal(bandages)
+  }
+}
+
+const cleanBandages = () => {
+  const dirtyBandages = client.findType(3616) as Item;
+  if (dirtyBandages && dirtyBandages.amount >= 1) {
+    console.log("Cleaning bandages")
+    player.useType(dirtyBandages.graphic, undefined, player.backpack)
+    target.wait()
+    target.entity(waterContainer)
+  }
+}
+
+/**
+ * Main loop
+ */
+let bandages = null;
+while (true) {
+  bandages = client.findType(bandagesID, undefined, player.backpack) as Item | null
+  if (player.hits <= maxHit) {
+    heal(bandages)
+  }
+  sleep(500)
+  bandages = client.findType(bandagesID, undefined, player.backpack) as Item | null
+  if (!bandages || bandages.amount <= minBandages) {
+    cleanBandages()
+  }
+  sleep(500);
+}

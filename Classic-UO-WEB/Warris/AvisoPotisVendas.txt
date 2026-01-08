@@ -1,0 +1,29 @@
+// Os comparto una macro básica,  con la cual, si activais el aviso de pociones y vendas en .perfil, simplemente os saltará [POTI] o [VENDA] para el PvP.
+// He intentado jugar con ella pero es que a mí estas mierdas me distraen. 
+// Su funcionamiento es muy básico y fácil de entender, de manera que podéis subir nuevos textos que lea el diario e incluir avisos de todo lo que queráis
+
+// Macro simple de aviso de venda y poción disponible.
+// Macro by Waris Ahluwalia.
+
+const avisoPocion = "Ya puedes tomar pociones de nuevo!"
+const avisoVenda = "Ya puedes usar las vendas de nuevo!"
+
+function checkDiario() {
+  journal.clear();
+  const aviso = journal.waitForTextAny([avisoPocion, avisoVenda]);
+
+  switch (aviso) {
+  case avisoPocion: {
+      client.headMsg("[POTI]", player.serial, 50);
+    break;
+  }
+  case avisoVenda: {
+    client.headMsg("[VENDA]", player.serial, 90);
+    break;
+    }
+}  
+}
+
+while (true) {
+  checkDiario();
+}

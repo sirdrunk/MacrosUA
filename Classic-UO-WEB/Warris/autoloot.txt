@@ -1,0 +1,22 @@
+const cadaver = client.findType(0x2006);
+const lootList = [0x13C7, 0x13D3];
+const bolsaLoot = client.findType(0xE76, null, player.backpack);
+
+function openCorpse() {
+  player.use(cadaver);
+  sleep(500);
+}
+
+function autoLoot() {
+  let found
+  for (let i = 0; i < lootList.length; i++) {
+    found = client.findType(lootList[i], null, cadaver);
+  if (found) {
+      player.moveItem(found, bolsaLoot);
+      sleep(600);
+    }
+  } 
+}
+
+openCorpse();
+autoLoot();
