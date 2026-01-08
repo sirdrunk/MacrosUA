@@ -1,0 +1,263 @@
+; ======================================================================================================
+;  '||   ||` '||`   ||                                 /.\      '||`
+;   ||   ||   ||    ||     ''                         // \\      ||   ''
+;   ||   ||   ||  ''||''   ||  '||),,(|,   '''|.     //...\\     ||   ||   '''|.  `||''|,  '''/  '''|.
+;   ||   ||   ||    ||     ||   || || ||  .|''||    //     \\    ||   ||  .|''||   ||  ||   //  .|''||
+;   `|...|'  .||.   `|..' .||. .||    ||. `|..||. .//       \\. .||. .||. `|..||. .||  ||. /... `|..||.
+; =====================================================================================================
+; Script Name: Precios Vendor
+; Author: Sthil Lauda
+; Version: 1.5
+; Client Tested with: 2.0.3
+; EUO version tested with: EasyUO 1.5 Version 243
+; Shard: Ultima Alianza (¡Hasta la muerte!)
+; Revision Date: 30/07/2019
+; Public Release: 15/04/2020
+; Global Variables Used: Ninguna.
+; Purpose: Pone el precio a todos los objetos de un tipo que hay en un contenedor.
+;_________________________________________
+;
+; ////////////////////////////////////////
+; ******** ¡NO HAY CONFIGURACIÓN! ********
+; ////////////////////////////////////////
+;_________________________________________
+;
+set #SYSMSGCOL 1187
+event sysmessage ====================
+wait 20
+set #SYSMSGCOL 1165
+event sysmessage Precios Vendor v1.5
+wait 20
+set #SYSMSGCOL 1187
+event sysmessage ====================
+wait 20
+set #menubutton n/a  ; NO TOCAR
+set %precio 0        ; NO TOCAR
+gosub showEUOMenu1   ; NO TOCAR
+;
+;========================================================
+;
+; ******************* LOOP PRINCIPAL ********************
+;
+;========================================================
+;
+mainloop:
+gosub bloop
+wait 1
+goto mainloop
+;
+;========================================================
+;
+; ***************** FIN LOOP PRINCIPAL *****************
+;
+;========================================================
+;
+sub startMacro
+{
+ignoreitem reset CON_PRECIO
+set #SYSMSGCOL 43
+setuotitle Haz CLICK en el VENDOR
+event sysmessage ============================
+event sysmessage Haz CLICK en el VENDOR
+event sysmessage ============================
+wait 20
+set #TARGCURS 1
+while #TARGCURS = 1
+      {
+        wait 1
+      }
+gosub GetName #LTARGETID nombre_vendor
+set #SYSMSGCOL 88
+event sysmessage VENDOR: %nombre_vendor
+wait 20
+configurar:
+if %confp = 1 || %confp = N/A
+   {
+     set #sysmsgcol 1570
+     setuotitle Haz CLICK el contenedor
+     event sysmessage ====================
+     event sysmessage Haz CLICK en la bolsa
+     event sysmessage ====================
+     set #TARGCURS 1
+     target
+     while #TARGCURS = 1
+           {
+             wait 1
+           }
+     set %contenedor_1 #LTARGETID
+     set #LOBJECTID %contenedor_1
+     event macro 17
+     repeat
+          {
+            wait 1
+          }
+          until #CONTID = %contenedor_1
+     set %conf 1
+     goto TESC1
+   }
+TESC1:
+if %conf = 1
+   {
+     set #sysmsgcol 1570
+     setuotitle Haz CLICK en uno de los objetos
+     event sysmessage ====================
+     event sysmessage Haz CLICK en un objeto
+     event sysmessage ====================
+     set #TARGCURS 1
+     target
+     while #TARGCURS = 1
+           {
+             wait 1
+           }
+     set %objeto #LTARGETID
+     finditem %objeto
+     if #FINDCNT > 0
+        {
+          set %tipo_objeto #FINDTYPE
+          gosub GetName #FINDID nombre
+          event sysmessage TIPO: %nombre
+          wait 40
+        }
+        else
+           {
+             set #SYSMSGCOL 38
+             event sysmessage OBJETO NO ENCONTRADO!
+             wait 40
+             goto TESC1
+           }
+     set %conf 2
+     goto TESC2
+   }
+TESC2:
+if %conf = 2
+   {
+     set #sysmsgcol 1165
+     menu GetNum NUMPRECIO %precio
+     set %precio #menures
+     event sysmessage PRECIO: [ %precio ]
+     display yesno ¿ES CORRECTO EL PRECIO?
+     if #DISPRES = yes
+        {
+          set #sysmsgcol 88
+          event sysmessage EMPEZANDO!
+          wait 20
+          goto VendorLoop
+        }
+        else
+           {
+             set #SYSMSGCOL 1081
+             event sysmessage OK, REINICIANDO MACRO...
+             set #menubutton n/a
+             goto mainloop
+           }
+   }
+goto TESC
+
+VendorLoop:
+set %num_items 0
+finditem %tipo_objeto C_ , %contenedor_1
+if #FINDCNT > 0
+   {
+     for #FINDINDEX 1 #FINDCNT
+         {
+           gosub waitforprop #FINDID
+           if ( Precio Notin #PROPERTY || %precio Notin #PROPERTY ) ; Evitamos perder tiempo poniendo el mismo precio a algo que ya lo tiene...
+                {
+                  set #LOBJECTID #FINDID
+                  event macro 1 0 %nombre_vendor Precio %precio
+                  target
+                  set #LTARGETID #FINDID
+                  set #LTARGETKIND 1
+                  event macro 22
+                  set %num_items %num_items + 1
+                  if #FINDCNT > 5 ; Control de Spam Detection...
+                      {
+                        wait 5s
+                      }
+                      else
+                         {
+                           wait 20
+                         }
+                }
+                else
+                   {
+                     ignoreitem #FINDID CON_PRECIO
+                   }
+         }
+     set #sysmsgcol 88
+     event sysmessage TERMINADO! [ %num_items ] Items!
+     set #menubutton n/a
+     goto mainloop
+   }
+goto VendorLoop
+}
+return
+
+sub bloop
+bloop:
+if #menubutton <> n/a
+   {
+     gosub #menubutton
+     set #menubutton n/a
+   }
+return
+
+;--------- EasyUO Menu Designer Code Begin ---------
+sub showEUOMenu1
+	menu Clear
+	menu Window Title Precios Vendor v1.3
+	menu Window Color BtnFace
+	menu Window Size 304 59
+	menu Font Transparent #true
+	menu Font Align Right
+	menu Shape EUOShape2 0 0 298 57 4 1 1 Black 7 Lime
+	menu Shape EUOShape1 4 4 289 49 4 7 1 Black 7 Background
+	menu Font Name MS Sans Serif
+	menu Font Size 15
+	menu Font Style b
+	menu Font Color Green
+	menu Font Align Left
+	menu Font BGColor BtnShadow
+	menu Text EUOLabel1 12 16 PRECIO:
+	menu Font Size 12
+	menu Font Color Blue
+	menu Font BGColor Silver
+	menu Edit NUMPRECIO 106 16 101 %precio
+	menu Font Size 8
+	menu Font Color Yellow
+	menu Font BGColor Red
+	menu Button startMacro 216 12 69 33 START
+	menu Show 421 270
+return
+;--------- EasyUO Menu Designer Code End ---------
+
+;* @name GetName
+;* @author Roadkill
+;* @ver 1.0 24Jan04
+;* @purpose get the name of a creature/vendor
+;* @params %1= the id of the thing whose name you want, required
+;*      @%2= variable name to return the ID in, required
+;* @returns @%2 and #result
+;* @changes #property, #strres, @%2, !strlength
+;* @example call rksubs.txt GetName %beetle beetlename
+;* @status: tested
+sub GetName
+        set %id_property %1
+        gosub waitforprop %id_property
+        str pos #property $
+        set !strlength #strres - 1
+        str left #property !strlength
+        set % . %2 #strres
+return % . %2
+
+sub waitforprop ; <===================================================>
+event property #charid
+wait 1
+set %oldprop #property
+event property %1
+_testforprop:
+if #property = %oldprop
+   {
+     goto _testforprop
+   }
+return
