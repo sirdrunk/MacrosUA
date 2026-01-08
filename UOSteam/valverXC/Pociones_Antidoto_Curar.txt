@@ -1,0 +1,33 @@
+if hits < maxhits
+  // Verificar si está envenenado y tiene antídotos
+  if buffexists 'Poison' and counter 'cntr-9' > 0
+    // Liberar mano izquierda
+    clearhands 'left'
+    pause 500
+    // Usar antídotos
+    msg '.antidotomejorada'
+    pause 100
+    msg '.antidoto'
+    pause 100
+    msg '.antidotomenor'
+    pause 1000
+    // Recuperar arma
+    togglehands 'left'
+    pause 500
+    // Verificar si NO está envenenado y tiene pociones de vida
+  elseif not buffexists 'Poison' and counter 'cntr-2' > 0
+    // Liberar mano izquierda
+    clearhands 'left'
+    pause 500
+    // Usar pociones de vida
+    msg '.vidamejorada'
+    pause 100
+    msg '.vida'
+    pause 100
+    msg '.vidamenor'
+    pause 1000
+    // Recuperar arma
+    togglehands 'left'
+    pause 500
+  endif
+endif
