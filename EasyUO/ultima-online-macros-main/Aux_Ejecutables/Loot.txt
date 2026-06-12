@@ -1,0 +1,41 @@
+;============================================================
+;LOOT
+;============================================================
+;
+; Ejecuta la apertura o uso de un objeto dentro de contenedor.
+;
+; RESPONSABILIDAD:
+;  - Buscar un objeto específico dentro de un contenedor
+;  - Utilizar el objeto encontrado
+;
+; PARÁMETROS:
+;  %1 = type del objeto a utilizar
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO mueve items
+;   - NO analiza resultados
+;   - NO gestiona inventario
+;
+;  Solo ejecuta el uso directo del objeto encontrado.
+;
+;============================================================
+
+initEvents
+
+; CONFIGURACIÓN LOCAL
+set %type UFG
+
+; BUSCAR ITEM EN CONTENEDOR
+finditem UFG C_ , YFM
+
+if #FINDCNT > 0
+{
+    ; USAR OBJETO
+    set #LOBJECTID #FINDID
+    event macro 17 0
+
+    wait 1s
+}
+
+exit

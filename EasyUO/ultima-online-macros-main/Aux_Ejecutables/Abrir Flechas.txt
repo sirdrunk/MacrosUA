@@ -1,0 +1,41 @@
+;============================================================
+;ABRIR FLECHAS
+;============================================================
+;
+; Abre o utiliza un item específico de tipo flecha/lote.
+;
+; RESPONSABILIDAD:
+;  - Buscar el item configurado en la mochila
+;  - Ejecutar el uso del objeto encontrado
+;
+; PARÁMETROS:
+;  %1 = type del objeto a utilizar
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO fabrica objetos
+;   - NO mueve recursos
+;   - NO analiza resultados
+;
+;  Solo ejecuta el uso directo del objeto.
+;
+;============================================================
+
+initEvents
+
+; CONFIGURACIÓN LOCAL
+set %type UFG
+
+; BUSCAR ITEM EN MOCHILA
+finditem UFG C_ , #BACKPACKID
+
+if #FINDCNT > 0
+{
+    ; USAR OBJETO
+    set #LOBJECTID #FINDID
+    event macro 17 0
+
+    wait 1s
+}
+
+exit

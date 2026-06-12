@@ -1,0 +1,184 @@
+; ################################################################
+; # PREPARADOR - CRAFTEO TIENDA
+; ################################################################
+;
+; Flujo:
+; - asegura objeto de skill
+; - compra recursos / herramientas
+; - vende productos
+;
+
+
+; ============================================================
+; FLUJO PRINCIPAL
+; ============================================================
+
+Preparador:
+
+    gosub BuscarObjetoSkill
+    gosub ComprarItems
+    gosub VenderItems
+
+    wait 1s
+
+exit
+
+
+; ============================================================
+; OBJETO DE SKILL
+; ============================================================
+
+sub BuscarObjetoSkill
+
+    if *CFG_SKILL_REQUIRES_OBJECT <> 1
+        return
+
+
+    ; equipado
+    if *CFG_SKILL_EQUIP_OBJECT = 1
+    {
+        finditem *CFG_SKILL_OBJECT_TYPE C_ , #CHARID
+
+        if #FINDKIND <> -1
+        {
+            set *skillObjectID #FINDID
+            return
+        }
+    }
+
+
+    ; mochila
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #BACKPACKID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [PREP] objeto en mochila #FINDCNT
+
+        set %skillObjectCount #FINDCNT
+        set *skillObjectID #FINDID
+
+        if *CFG_SKILL_EQUIP_OBJECT = 1
+        {
+            set #LOBJECTID *skillObjectID
+            event macro 17 0
+            wait 7
+        }
+    }
+    else
+    {
+        set %skillObjectCount 0
+    }
+
+
+    ; compra automática si falta
+    while %skillObjectCount < *CFG_SKILL_OBJECT_COUNT
+    {
+        set %skillObjectCount %skillObjectCount + 1
+        key *CFG_SKILL_OBJECT_BUY_KEY
+        wait 2s
+    }
+
+
+    ; validación final
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #BACKPACKID
+
+    if #FINDKIND <> -1
+    {
+        set *skillObjectID #FINDID
+
+        if *CFG_SKILL_EQUIP_OBJECT = 1
+        {
+            set #LOBJECTID *skillObjectID
+            event macro 17 0
+            wait 7
+        }
+    }
+
+return
+
+
+; ============================================================
+; COMPRA DE RECURSOS
+; ============================================================
+
+sub ComprarItems
+
+    set %resource_index 0
+
+    while %resource_index <= *CFG_RESOURCE_COUNT
+    {
+        gosub AsegurarRecurso %resource_index
+        set %resource_index %resource_index + 1
+    }
+
+    Event SysMessage [PREP] recursos comprados
+
+return
+
+
+sub AsegurarRecurso
+
+    set %type *CFG_RESOURCE_TYPE . %1
+    set %cantidadObjetivo *CFG_RESOURCE_QUANTITY . %1
+    set %resourceBuyKey *CFG_RESOURCE_BUY_KEY . %1
+    set %useAfterBuy *CFG_RESOURCE_BUY_USE_AFTER_BUY . %1
+    set %buyUseType *CFG_RESOURCE_BUY_USE_TYPE . %1
+
+    set %cantidadActual 0
+
+    finditem %type C_ , #BACKPACKID
+
+    if #FINDCNT > 0
+        set %cantidadActual #FINDSTACK
+
+    if %cantidadActual >= %cantidadObjetivo
+    {
+        Event SysMessage [PREP] recurso %1 OK
+        return
+    }
+
+    Event SysMessage [PREP] comprando recurso %1
+
+    key %resourceBuyKey
+    wait 2s
+
+    finditem %buyUseType C_ , #BACKPACKID
+
+    if #FINDKIND = -1
+    {
+        Event SysMessage [PREP] recurso no encontrado
+        return
+    }
+
+    if %useAfterBuy = 1
+    {
+        set #LOBJECTID #FINDID
+        event macro 17 0
+        wait 7
+    }
+
+return
+
+
+; ============================================================
+; VENTA DE ITEMS
+; ============================================================
+
+sub VenderItems
+
+    set %crafted_index 0
+
+    while %crafted_index <= *CFG_CRAFTED_COUNT
+    {
+        ; BUG FIX: antes usabas %1 aquí (incorrecto)
+        set %crafterItemSellKey *CFG_CRAFTED_ITEM_SELL_KEY . %crafted_index
+
+        key %crafterItemSellKey
+        wait 1s
+
+        set %crafted_index %crafted_index + 1
+    }
+
+    Event SysMessage [PREP] items vendidos
+
+return

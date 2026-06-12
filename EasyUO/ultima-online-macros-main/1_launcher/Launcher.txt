@@ -1,0 +1,138 @@
+; ################################################################
+; # LAUNCHER / EJECUTOR PRINCIPAL
+; ################################################################
+;
+; Punto de entrada del framework modular de macros.
+;
+; Responsabilidades:
+;   - Inicializar entorno de ejecución
+;   - Cargar configuración seleccionada
+;   - Resetear estado runtime global
+;   - Resolver y lanzar el orquestador
+;
+; Este script NO contiene lógica de juego.
+; Toda la lógica se delega a módulos del framework.
+
+
+; ============================================================
+; VARIABLES LOCALES DEL LAUNCHER
+; ============================================================
+
+; *SCRIPT_DIR
+;     Ruta base del framework
+
+; *CONFIG_SCRIPT
+;     Configuración seleccionada
+
+; *ORQUESTADOR_SCRIPT
+;     Script principal definido por la config
+
+; *DEBUGMODE
+;     Activación de logs
+
+; *resetState
+;     Flag de reseteo inicial
+
+
+; ============================================================
+; VARIABLES DEL FRAMEWORK (REFERENCIA)
+; ============================================================
+;
+; Estas variables NO se usan directamente aquí.
+; Son gestionadas por otros módulos.
+
+; Ejemplos:
+;   *STATE
+;   *tileFoundX
+;   *tileFoundY
+;   *skillObjectID
+;   *zoneCountX
+
+; ============================================================
+; CONFIGURACIONES DISPONIBLES
+;     Config_BowCrafting
+;     Config_BowCrafting_Flechas
+;     Config_Carpentry
+;     Config_Casas
+;     Config_Lumberjacking
+;     Config_Lumberjacking_CasaDami
+;     Config_Minero
+;     Config_Vendas
+;     Config_Tailor
+;     Config_Tailor_Estatico
+;     Config_Minero_Fundir
+;     Config_Arqueria
+;     Config_ArqueriaCastillo
+;     Config_Doma_Yew
+; ============================================================
+
+; ============================================================
+; INICIO SCRIPT
+; ============================================================
+
+initEvents
+set *DEBUGMODE 0
+
+set *SCRIPT_DIR D:\Damian\Chorradillas\UltimaOnline\ultima-online-macros\
+
+; Configuración seleccionada (editar solo esta línea)
+set %CONFIG_SCRIPT *SCRIPT_DIR , 0_config\ , Config_Doma_Yew.txt
+
+; Carga de configuración
+Event SysMessage loadingScript CONFIG %CONFIG_SCRIPT
+call %CONFIG_SCRIPT
+
+set *SKILL_TILES_OK_COUNT 0
+
+; RESET DE ESTADO RUNTIME
+set %resetState 1
+
+if %resetState = 1
+    gosub resetVariables
+
+
+; RESOLUCIÓN DEL ORQUESTADOR
+
+set %ORQUESTADOR_SCRIPT *SCRIPT_DIR , 2_orquestador\ , *CFG_SCRIPT_ORQUESTADOR
+
+wait 50
+; LANZAMIENTO DEL ORQUESTADOR
+
+Event SysMessage loadingScript ORQUESTADOR %ORQUESTADOR_SCRIPT
+call %ORQUESTADOR_SCRIPT
+
+halt
+
+; ============================================================
+; FIN FLUJO PRINCIPAL
+; INICIO DE SUBS
+; ============================================================
+
+; ------------------------------------------------------------
+; RESET DE VARIABLES RUNTIME
+; ------------------------------------------------------------
+sub resetVariables
+
+    ; --------------------------------------------------------
+    ; estado general del sistema
+    ; --------------------------------------------------------
+    set *STATE 0
+
+    ; --------------------------------------------------------
+    ; resultados de scan / targeting
+    ; --------------------------------------------------------
+    set *tileFoundX -1
+    set *tileFoundY -1
+
+    ; --------------------------------------------------------
+    ; skill runtime
+    ; --------------------------------------------------------
+    set *skillObjectID 0
+    set *SKILL_TILES_OK_COUNT 0
+
+    ; --------------------------------------------------------
+    ; control de farmzone
+    ; --------------------------------------------------------
+    set *resetFarmZone 1
+
+return

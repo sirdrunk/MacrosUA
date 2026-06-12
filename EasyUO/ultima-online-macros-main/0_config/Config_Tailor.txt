@@ -1,0 +1,70 @@
+Event SysMessage [CONFIG] Inicializando configuracion de TAILOR
+
+; =========================
+; INSTRUCCIONES
+; =========================
+
+; Colocarse cerca de un vendedor de telas
+; Configurar los scripts de assistUO para comprar, vender y fabricar como se indica en los preparadores y ejecutores.
+; Tener abierto el gump de costura con la pagina donde se fabrican las bandanas
+
+; =========================
+; FICHEROS
+; =========================
+set *CFG_SCRIPT_ORQUESTADOR Orquestador.txt
+set *CFG_SCRIPT_INICIALIZADOR Inicializador_Vacio.txt
+set *CFG_SCRIPT_PREPARADOR Preparador_Crafteo_Tienda.txt
+set *CFG_SCRIPT_EJECUTOR Ejecutor_Crafteo_Tienda.txt
+
+
+; =========================
+; RESOURCES
+; =========================
+set *CFG_RESOURCE_TYPE0 RTI ;Tela
+set *CFG_RESOURCE_QUANTITY0 24
+set *CFG_RESOURCE_CONTAINER0 
+set *CFG_RESOURCE_BUY_KEY0 F1
+set *CFG_RESOURCE_BUY_USE_AFTER_BUY0 1
+set *CFG_RESOURCE_BUY_USE_TYPE0 ZZF ;Tela enrollada
+set *CFG_RESOURCE_COUNT 0
+
+
+; =========================
+; SKILL
+; =========================
+set *CFG_SKILL_NAME TAILOR
+set *CFG_SKILL_USE Tailor
+set *CFG_SKILL_REQUIRES_OBJECT 1
+set *CFG_SKILL_EQUIP_OBJECT 0
+set *CFG_SKILL_OBJECT_TYPE HAG      ; Kit de Costura
+set *CFG_SKILL_OBJECT_COUNT 3
+set *CFG_SKILL_OBJECT_CONTAINER HOGDSND ;***********	Contenedor con kits de costura
+set *CFG_SKILL_OBJECT_USEOBJECT 1
+set *CFG_SKILL_OBJECT_USETARGET 1
+set *CFG_SKILL_OBJECT_TARGET RTI     ; Tela
+set *CFG_SKILL_OBJECT_BUY_KEY F2
+
+; =========================
+; CRAFTED_ITEMS
+; =========================
+set *CFG_CRAFTED_TYPE0 
+set *CFG_CRAFTED_CONTAINER0 
+set *CFG_CRAFTED_ITEM_SELL_KEY0 F3
+set *CFG_CRAFTED_COUNT 0
+
+; =========================
+; TIEMPOS
+; =========================
+set *CFG_TIME_ACCION 4s
+set *CFG_SKILL_ACTION_USES 12
+set *CFG_TIMEOUT_ACCION 120000
+set *CFG_ACCION_KEY F4
+
+
+; =========================
+; LOG
+; =========================
+set *CFG_LOG_LEVEL 3
+
+Event SysMessage [CONFIG] TAILOR lista
+exit

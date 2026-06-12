@@ -1,0 +1,201 @@
+;============================================================
+;EJECUTOR SKILL ON TILE
+;============================================================
+;
+;Ejecuta repetidamente una skill sobre un tile previamente
+;seleccionado por el PREPARADOR.
+;
+;RESPONSABILIDAD:
+;  - Ejecutar skill sobre *tileFoundX/Y/Z
+;  - Controlar número de usos por tile
+;  - Analizar resultado mediante journal
+;  - Ejecutar rutinas de control de peso
+;
+;IMPORTANTE:
+;  Este script NO selecciona tiles.
+;  Este script NO cambia zonas.
+;  Este script NO decide el flujo global.
+;
+;============================================================
+;
+;DEPENDE DE:
+;  - *tileFoundX / *tileFoundY / *tileFoundZ
+;  - *skillObjectID
+;
+;============================================================
+
+set %SCRIPT_VUELTA_CASA *SCRIPT_DIR , aux_tools\ , Vuelta_Casa.txt
+
+set %RESULT_FAIL 1
+set %RESULT_WAIT 2
+set %RESULT_OK 0
+
+gosub EjecutarSkill
+exit
+
+
+;------------------------------------------------------------
+; SUB: EJECUTAR SKILL SOBRE TILE
+;------------------------------------------------------------
+sub EjecutarSkill
+
+    set %usosSkill 0
+
+    if *DEBUGMODE = 1
+        Event SysMessage [EJECUTOR] Skill en *tileFoundX | *tileFoundY
+
+    repeat
+    {
+        set %journalStart #JINDEX
+
+        ;----------------------------------------------------
+        ; ACTIVAR OBJETO DE SKILL
+        ;----------------------------------------------------
+        if *skillObjectID = 0
+            gosub BuscarObjetoSkill
+
+        set #LOBJECTID *skillObjectID
+        event macro 17 0
+
+        ;----------------------------------------------------
+        ; TARGET TILE
+        ;----------------------------------------------------
+        target 10s
+        set #LTARGETX *tileFoundX
+        set #LTARGETY *tileFoundY
+        set #LTARGETZ *tileFoundZ
+		set #LTARGETKIND 3
+
+        ; CONFIRMAR ACCIÓN
+        event macro 22 0
+        wait *CFG_TIME_ACCION
+
+        ; RESULTADO SKILL
+        gosub EsperarResultado
+
+        ; CONTROL DE PESO / RUTINAS AUXILIARES
+        gosub ComprobarPeso
+
+        ; SI FALLA, TERMINA CICLO DEL TILE
+        if %resultado = %RESULT_FAIL
+            return
+
+        ; INCREMENTO DE USOS
+        set %usosSkill %usosSkill + 1
+
+        if %usosSkill >= *CFG_SKILL_MAX_USOS
+            return
+
+    }
+    until 0
+
+return
+
+
+;============================================================
+; ESPERA RESULTADO SKILL
+;============================================================
+sub EsperarResultado
+
+    set %resultado %RESULT_WAIT
+    set %startTime #SYSTIME
+
+    repeat
+        set %journalEnd #JINDEX
+        gosub AnalizarResultado
+        set %journalStart %journalEnd
+
+        if %resultado = %RESULT_OK || %resultado = %RESULT_FAIL
+            return
+
+        if #SYSTIME - %startTime > 10000
+        {
+            Event SysMessage [EJECUTOR] TIMEOUT SKILL
+            set %resultado %RESULT_FAIL
+            return
+        }
+
+        wait 50
+
+    until 0
+
+return
+
+
+;============================================================
+; ANALISIS JOURNAL
+;============================================================
+sub AnalizarResultado
+
+    for %journalIndex %journalStart %journalEnd
+    {
+        set %journalIndexToFind #JINDEX - %journalIndex
+        scanjournal %journalIndexToFind
+
+        ; FAIL
+        for %failIndex 0 *CFG_FAIL_COUNT
+        {
+            if *CFG_FAIL . %failIndex in #JOURNAL
+            {
+                if *DEBUGMODE = 1
+                    Event SysMessage [EJECUTOR] FAIL
+
+                set %resultado %RESULT_FAIL
+                return
+            }
+        }
+
+        ; OK
+        for %okIndex 0 *CFG_OK_COUNT
+        {
+            if *CFG_OK . %okIndex in #JOURNAL
+            {
+                if *DEBUGMODE = 1
+                    Event SysMessage *CFG_SKILL_NAME OK
+
+                set *SKILL_TILES_OK_COUNT *SKILL_TILES_OK_COUNT + 1
+                set %resultado %RESULT_OK
+                return
+            }
+        }
+    }
+
+return
+
+
+;============================================================
+; CONTROL DE PESO / RUTINAS CASA
+;============================================================
+sub ComprobarPeso
+
+    gosub ComprobarCasa
+
+    if %volverACasa = 1
+    {
+        if *DEBUGMODE = 1
+            Event SysMessage [EJECUTOR] Carga excedida
+
+        if *CFG_IR_CASA = 1
+        {
+            call %SCRIPT_VUELTA_CASA
+        }
+        else
+        {
+            for %itemIndex 0 *CFG_ITEM_RECOGIDA_COUNT
+            {
+                gosub dejando *CFG_ITEM_RECOGIDA . %itemIndex C_ #BACKPACKID dropc *cofre
+            }
+        }
+    }
+
+return
+
+
+sub ComprobarCasa
+
+    set %volverACasa 0
+
+    if *CFG_PESO_MAX < #WEIGHT
+        set %volverACasa 1
+
+return

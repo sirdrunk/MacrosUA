@@ -1,0 +1,132 @@
+;============================================================
+;MOVER ITEMS
+;============================================================
+;
+; Mueve items entre contenedores hasta alcanzar una cantidad.
+;
+; RESPONSABILIDAD:
+;  - Buscar items en contenedor origen
+;  - Mover items al contenedor destino
+;  - Repetir hasta alcanzar cantidad objetivo
+;
+; PARÁMETROS:
+;  %1 = itemType
+;  %2 = sourceContainer
+;  %3 = targetContainer
+;  %4 = targetAmount
+;
+; IMPORTANTE:
+;  Si targetAmount < 0:
+;   - Se moverán todos los items encontrados
+;
+; RETORNO:
+;  El script finaliza cuando:
+;   - Se alcanza la cantidad objetivo
+;   - No quedan items en origen
+;   - El movimiento deja de producir cambios
+;
+;============================================================
+
+initEvents
+
+gosub MoveUntilAmount *param1 *param2 *param3 *param4
+
+exit
+
+
+sub MoveUntilAmount
+
+    ; %1 = itemType
+    ; %2 = sourceContainer
+    ; %3 = targetContainer
+    ; %4 = targetAmount
+
+    set %itemType %1
+    set %sourceContainer %2
+    set %targetContainer %3
+    set %targetAmount %4
+
+    ; MODO MOVER TODO
+    if %targetAmount < 0
+    {
+        set %targetAmount 99999999
+    }
+
+    ; OBTENER CANTIDAD ACTUAL EN DESTINO
+    set %currentAmount 0
+
+    gosub buscarEnContenedor %itemType %targetContainer
+
+    if #FINDKIND <> -1
+    {
+        set %currentAmount #FINDSTACK
+    }
+
+    ; VALIDAR SI YA SE CUMPLE OBJETIVO
+    if %currentAmount >= %targetAmount
+    {
+        return
+    }
+
+    ; BUCLE PRINCIPAL DE MOVIMIENTO
+    while %currentAmount < %targetAmount
+    {
+        ; BUSCAR EN ORIGEN
+        gosub buscarEnContenedor %itemType %sourceContainer
+
+        if #FINDCNT = 0
+        {
+            return
+        }
+
+        ; CALCULAR CANTIDAD A MOVER
+        set %needed %targetAmount - %currentAmount
+
+        if #FINDSTACK > %needed
+        {
+            set %moveAmount %needed
+        }
+        else
+        {
+            set %moveAmount #FINDSTACK
+        }
+
+        ; MOVER ITEM
+        exevent drag #FINDID %moveAmount
+        wait 7
+
+        exevent dropc %targetContainer
+        wait 7
+
+        ; ACTUALIZAR CANTIDAD DESTINO
+        finditem %itemType C_ , %targetContainer
+
+        set %newCurrentAmount #FINDSTACK
+
+        ; VALIDAR SI HUBO CAMBIOS
+        if %currentAmount = %newCurrentAmount
+        {
+            return
+        }
+
+        set %currentAmount %newCurrentAmount
+    }
+
+return
+
+
+sub buscarEnContenedor
+
+    ; %1 = itemType
+    ; %2 = contenedor objetivo
+
+    ; ABRIR CONTENEDOR
+    set #LOBJECTID %2
+    event macro 17 0
+
+    wait 7
+
+    ; BUSCAR ITEM
+    finditem %1 C_ , %2
+
+return

@@ -1,0 +1,147 @@
+;============================================================
+;EJECUTOR MINERO - FUNDIDO
+;============================================================
+;
+;Flujo encargado de procesar minerales desde contenedores
+;y ejecutar su fundido mediante interacción con objeto.
+;
+;RESPONSABILIDAD:
+;  - Extraer minerales desde contenedores definidos
+;  - Moverlos a la mochila (si aplica vía script auxiliar)
+;  - Ejecutar acción de fundido sobre cada mineral
+;
+;IMPORTANTE:
+;  Este script NO decide qué minerales usar.
+;  Todo está definido por CFG_RESOURCE_*.
+;
+;  La acción de fundido depende de:
+;     event macro 17 0 (uso del objeto)
+;
+;============================================================
+
+set %SCRIPT_MOVER_ITEMS *SCRIPT_DIR , aux_tools\ , Mover_Items.txt
+
+Preparador:
+
+    gosub SepararYUsarMinerales
+    wait 1s
+
+exit
+
+
+;============================================================
+; FLUJO PRINCIPAL DE PROCESADO
+;============================================================
+sub SepararYUsarMinerales
+
+    set %resource_index 0
+
+    while %resource_index <= *CFG_RESOURCE_COUNT
+    {
+        gosub SepararYUsarMineral %resource_index
+        set %resource_index %resource_index + 1
+    }
+
+return
+
+
+;============================================================
+; PROCESADO POR TIPO DE MINERAL
+;============================================================
+sub SepararYUsarMineral
+    ; %1 = índice de recurso
+
+    set %type *CFG_RESOURCE_TYPE . %1
+    set %contenedor *CFG_RESOURCE_CONTAINER_TO . %1
+
+    set %contenedor_objetivo #BACKPACKID
+    set %cantidadObjetivo 1
+    set %repeticiones *CFG_RESOURCE_QUANTITY . %1
+
+
+    ; CICLO DE PROCESAMIENTO
+    for %indice 0 %repeticiones
+    {
+        ; ACTIVACIÓN DEL CONTENEDOR ORIGEN (OPEN/TOGGLE)
+        set #LOBJECTID %contenedor
+        event macro 17 0
+        wait 7
+
+        ; BUSCAR MATERIAL EN CONTENEDOR ORIGEN
+        finditem %type C_ , %contenedor
+
+        if #FINDCNT = 0
+        {
+            ; Origen vacío -> se termina el ciclo interno
+        }
+        else
+        {
+            ; MOVIMIENTO HACIA MOCHILA
+            gosub callScriptWithParams %SCRIPT_MOVER_ITEMS %type %contenedor %contenedor_objetivo %cantidadObjetivo
+
+            ; VALIDAR DESTINO
+            finditem %type C_ , %contenedor_objetivo
+
+            if #FINDCNT = 0
+            {
+                Event SysMessage [EJEC] DESTINO VACIO
+            }
+            else
+            {
+                ; FUNDIDO DEL MINERAL
+                gosub fundirMineral #FINDID
+            }
+        }
+    }
+
+return
+
+
+;============================================================
+; FUNDIDO DE MINERAL
+;============================================================
+sub fundirMineral
+    ; %1 = id del mineral
+
+    wait 7
+
+    set #LOBJECTID %1
+    event macro 17 0   ; uso del objeto (fundir)
+
+return
+
+
+; ============================================================
+; CALL SCRIPT UTILITY
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

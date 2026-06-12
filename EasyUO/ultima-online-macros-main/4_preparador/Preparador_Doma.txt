@@ -1,0 +1,259 @@
+; ################################################################
+; # PREPARADOR - DOMA
+; ################################################################
+;
+; Flujo:
+; - anti-stuck automático
+; - búsqueda de animal
+; - movimiento por zonas
+; - fallback de cambio de zona
+;
+
+
+; ============================================================
+; SCRIPTS AUXILIARES
+; ============================================================
+
+set %SCRIPT_ZONE_SHIFTER *SCRIPT_DIR , aux_tools\ , ZoneShifter.txt
+set %SCRIPT_TELEPORT_DESATASCAR *SCRIPT_DIR , aux_tools\ , Teleport_Si_Atascado.txt
+set %SCRIPT_MOVERALUGAR *SCRIPT_DIR , aux_tools\ , Mover_A_Lugar.txt
+set %SCRIPT_EQUIPAR_ARMA *SCRIPT_DIR , aux_tools\ , Equipar_Item.txt
+
+
+; ============================================================
+; FLUJO PRINCIPAL
+; ============================================================
+
+gosub pauseDebug
+gosub PrepararAccion
+
+exit
+
+
+sub PrepararAccion
+
+    gosub callScriptWithParams %SCRIPT_TELEPORT_DESATASCAR *CFG_SAFE_TILE_X *CFG_SAFE_TILE_Y
+	
+
+    gosub ResetAnimalsIgnoreIfCooldown
+
+	gosub callScriptWithParams %SCRIPT_EQUIPAR_ARMA *CFG_ANIMAL_KILL_WEAPONS
+    gosub ScanZona
+
+    if *ANIMAL_TARGET_ID <> -1
+        return
+
+
+    gosub MoverACentroZona
+
+
+    gosub ScanZona
+
+    if *ANIMAL_TARGET_ID <> -1
+        return
+
+
+    gosub callScriptWithParams %SCRIPT_ZONE_SHIFTER
+
+    if *zoneStartX = -1
+    {
+        set *ANIMAL_TARGET_ID -1
+        return
+    }
+
+
+    gosub ScanZona
+
+    if *ANIMAL_TARGET_ID <> -1
+        return
+
+
+    set *ANIMAL_TARGET_ID -1
+
+return
+
+
+; ============================================================
+; ANTI STUCK ESCAPE SYSTEM
+; ============================================================
+
+sub EscapeIfStuck
+
+    gosub CheckIfStuck
+
+    if *PLAYER_IS_STUCK <> 1
+        return
+
+    if *DEBUGMODE = 1
+        event sysmessage [STUCK] escape iniciado
+
+    set %stuckX #CHARPOSX
+    set %stuckY #CHARPOSY
+
+
+    for %escapeStep 1 5
+    {
+
+        set %teleX #CHARPOSX
+        set %teleY #CHARPOSY
+
+        set %offset %escapeStep * 3
+
+
+        if *CFG_SAFE_TILE_X > #CHARPOSX
+            set %teleX #CHARPOSX + %offset
+        else
+            set %teleX #CHARPOSX - %offset
+
+
+        if *CFG_SAFE_TILE_Y > #CHARPOSY
+            set %teleY #CHARPOSY + %offset
+        else
+            set %teleY #CHARPOSY - %offset
+
+
+        if *DEBUGMODE = 1
+            event sysmessage [ESCAPE] intento %escapeStep
+
+
+        msg .tele $
+
+        target 3s
+        set #LTARGETX %teleX
+        set #LTARGETY %teleY
+        set #LTARGETKIND 2
+
+        wait 1500
+
+
+        if #CHARPOSX <> %stuckX
+            return
+
+        if #CHARPOSY <> %stuckY
+            return
+    }
+
+    if *DEBUGMODE = 1
+        event sysmessage [ESCAPE] fallo total
+
+return
+
+
+; ============================================================
+; IGNORE RESET SYSTEM
+; ============================================================
+
+sub ResetAnimalsIgnoreIfCooldown
+
+    if *ANIMALS_START_TIMESTAMP = ""
+    {
+        set *ANIMALS_START_TIMESTAMP #SYSTIME
+        return
+    }
+
+    if #SYSTIME - *ANIMALS_START_TIMESTAMP > *CFG_TAMING_COOLDOWN
+    {
+        if *DEBUGMODE = 1
+            Event SysMessage [IGNORE] reset cooldown
+
+        ignoreitem reset 1
+        set *ANIMALS_IGNORED_LIST ""
+
+        set *ANIMALS_START_TIMESTAMP #SYSTIME
+    }
+
+return
+
+
+; ============================================================
+; MOVEMENT HELPERS
+; ============================================================
+
+sub MoverACentroZona
+
+    gosub callScriptWithParams %SCRIPT_MOVERALUGAR *FARMZONECENTERX *FARMZONECENTERY 1 10s
+
+return
+
+
+; ============================================================
+; ZONE SCANNER
+; ============================================================
+
+sub ScanZona
+	event sysmessage escaneando zona
+    set *ANIMAL_TARGET_ID -1
+
+    findItem *CFG_ANIMAL_TYPES G_ , *CFG_ANIMAL_DISTANCE
+
+    if #findkind > -1
+    {
+        set *ANIMAL_TARGET_ID #FINDID
+        set *ANIMAL_POSICION_X #FINDX
+        set *ANIMAL_POSICION_Y #FINDY
+
+        if *DEBUGMODE = 1
+            event sysmessage [ANIMAL] encontrado
+
+        gosub callScriptWithParams %SCRIPT_MOVERALUGAR *ANIMAL_POSICION_X *ANIMAL_POSICION_Y 2 5s
+
+        if *returned0 = 1
+        {
+            if *DEBUGMODE = 1
+                event sysmessage [MOVE] ok
+
+            return
+        }
+
+        set *ANIMAL_TARGET_ID -1
+    }
+
+return
+
+
+; ============================================================
+; DEBUG
+; ============================================================
+
+sub pauseDebug
+
+    if *DEBUGMODE = 1
+        pause
+
+return
+
+
+; ============================================================
+; UTILITY: CALL SCRIPT WITH PARAMS
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

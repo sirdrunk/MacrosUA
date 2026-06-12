@@ -1,0 +1,192 @@
+;============================================================
+;TELEPORT SI ATASCADO
+;============================================================
+;
+; Detecta si el personaje está atascado e intenta liberarlo
+; utilizando teletransporte.
+;
+; RESPONSABILIDAD:
+;  - Detectar posición bloqueada
+;  - Intentar múltiples escapes
+;  - Lanzar teleports en distintas direcciones
+;
+; PARÁMETROS:
+;  %1 = posicionX objetivo
+;  %2 = posicionY objetivo
+;
+; VARIABLES MODIFICADAS:
+;  *PLAYER_IS_STUCK
+;  *LAST_PREPARADOR_X
+;  *LAST_PREPARADOR_Y
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO realiza pathfinding
+;   - NO cambia zonas
+;   - SOLO intenta desbloquear movimiento
+;
+;============================================================
+
+initEvents
+
+gosub EscapeIfStuck *param1 *param2
+
+exit
+
+
+sub EscapeIfStuck
+
+    ; DETECTAR BLOQUEO
+    gosub CheckIfStuck
+
+    if *PLAYER_IS_STUCK <> 1
+        return
+
+    if *DEBUGMODE = 1
+        event sysmessage [STUCK] Intentando escapar
+
+    ; GUARDAR POSICIÓN ACTUAL
+    set %stuckX #CHARPOSX
+    set %stuckY #CHARPOSY
+
+    ; RESOLVER DIRECCIÓN BASE
+    set %sefedirX %1
+    set %safedirY %2
+
+    set %dirX -1
+    set %dirY -1
+
+    if %sefedirX > #CHARPOSX
+        set %dirX 1
+
+    if %sefedirY > #CHARPOSY
+        set %dirY 1
+
+    ; INTENTOS DE ESCAPE
+    for %escapeStep 1 7
+    {
+        ; DISTANCIA BASE
+        set %offset 3
+
+        ; RESET MOVIMIENTO
+        set %moveX 0
+        set %moveY 0
+
+        ; CALCULAR DIRECCIÓN SEGÚN INTENTO
+        if %escapeStep = 1
+        {
+            ; diagonal centro
+            set %moveX %dirX * %offset
+            set %moveY %dirY * %offset
+        }
+
+        if %escapeStep = 2
+        {
+            ; derecha
+            set %moveX %dirX * %offset
+            set %moveY 0
+        }
+
+        if %escapeStep = 3
+        {
+            ; arriba / abajo
+            set %moveX 0
+            set %moveY %dirY * %offset
+        }
+
+        if %escapeStep = 4
+        {
+            ; diagonal invertida Y
+            set %moveX %dirX * %offset
+            set %moveY - %dirY * %offset
+        }
+
+        if %escapeStep = 5
+        {
+            ; diagonal invertida X
+            set %moveX - %dirX * %offset
+            set %moveY %dirY * %offset
+        }
+
+        if %escapeStep = 6
+        {
+            ; dirección opuesta
+            set %moveX - %dirX * %offset
+            set %moveY - %dirY * %offset
+        }
+
+        if %escapeStep = 7
+        {
+            ; posición aleatoria
+            rand %moveX -4 4
+            rand %moveY -4 4
+        }
+
+        ; CALCULAR DESTINO FINAL
+        set %teleX #CHARPOSX + %moveX
+        set %teleY #CHARPOSY + %moveY
+
+        if *DEBUGMODE = 1
+            event sysmessage [ESCAPE] Intento # %escapeStep
+
+        ; LANZAR TELEPORT
+        gosub CastTeleport %teleX %teleY
+
+        wait 3s
+
+        ; VALIDAR SI HEMOS SALIDO
+        if #CHARPOSX <> %stuckX
+            return
+
+        if #CHARPOSY <> %stuckY
+            return
+    }
+
+    if *DEBUGMODE = 1
+        event sysmessage [ESCAPE] No se pudo escapar
+
+return
+
+
+sub CastTeleport
+
+    ; %1 = destinoX
+    ; %2 = destinoY
+
+    ; LANZAR COMANDO
+    msg .tele $
+
+    ; FIJAR TARGET
+    target 3s
+
+    set #LTARGETX %1
+    set #LTARGETY %2
+    set #LTARGETKIND 2
+
+    ; CONFIRMAR TARGET
+    target 3s
+    event macro 22
+
+return
+
+
+sub CheckIfStuck
+
+    ; DETECTAR SI SE REPITE POSICIÓN
+    set *PLAYER_IS_STUCK 0
+
+    if #CHARPOSX = *LAST_PREPARADOR_X
+    {
+        if #CHARPOSY = *LAST_PREPARADOR_Y
+        {
+            set *PLAYER_IS_STUCK 1
+
+            Event SysMessage [STUCK] Mismo tile detectado
+        }
+    }
+
+    ; ACTUALIZAR ÚLTIMA POSICIÓN
+    set *LAST_PREPARADOR_X #CHARPOSX
+    set *LAST_PREPARADOR_Y #CHARPOSY
+
+return

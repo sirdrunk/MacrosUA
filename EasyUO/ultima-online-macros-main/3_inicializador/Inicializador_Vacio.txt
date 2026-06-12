@@ -1,0 +1,27 @@
+; ################################################################
+; # INICIALIZADOR (VACÍO / NO-OP)
+; ################################################################
+;
+; Módulo de inicialización del framework.
+;
+; Actualmente no realiza ninguna operación.
+;
+; Se mantiene como parte de la arquitectura para:
+;   - preservar compatibilidad con el orquestador
+;   - permitir futuras extensiones de inicialización
+;   - mantener consistencia del pipeline:
+;       launcher → inicializador → preparador → ejecutor
+;
+; Este script puede ampliarse en el futuro para:
+;   - reset de estados complejos
+;   - cálculo inicial de zonas
+;   - validaciones previas al loop principal
+
+
+; ============================================================
+; INICIO EJECUCIÓN
+; ============================================================
+
+Event SysMessage [INICIADOR] Iniciado (sin lógica activa)
+
+exit

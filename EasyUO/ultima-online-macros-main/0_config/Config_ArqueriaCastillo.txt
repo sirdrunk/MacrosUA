@@ -1,0 +1,51 @@
+Event SysMessage [CONFIG] Inicializando configuracion de ARQUERIA
+
+; =========================
+; INSTRUCCIONES
+; =========================
+
+; Equiparse con un arco y flechas.
+; El personaje va a atacar al primer objetivo rojo cercano, para ello, hay que configurar el script en AssistUO como indique el ejecutor.
+; Preparado para macrear en el castillo a las afueras de britain, donde hay soldados rojos que no se mueven.
+; Situarse frente a uno lo suficientemente lejos para poder disparar y lo suficientemente cerca para lotear su cadaver.
+; Configurar el autoloot en assistUO para recuperar flechas.
+; Tener un pilon de agua y vendas por si te atacasen a distancia y te tienes que curar. No es necesario si te situas fente a los soldados melee que salen en la primera planta
+
+; =========================
+; FICHEROS
+; =========================
+set *CFG_SCRIPT_ORQUESTADOR Orquestador.txt
+set *CFG_SCRIPT_INICIALIZADOR Inicializador_Vacio.txt
+set *CFG_SCRIPT_PREPARADOR Preparador_Arqueria.txt
+set *CFG_SCRIPT_EJECUTOR Ejecutor_Arqueria.txt
+
+; =========================
+; TIEMPOS
+; =========================
+set *CFG_TIME_ACCION 5s
+set *CFG_SKILL_ACTION_USES 2
+set *CFG_TIMEOUT_ACCION 120s
+set *CFG_ACCION_KEY F1
+
+; =========================
+; MOVIMIENTO
+; =========================
+set *CFG_INITIAL_POS_X 1345
+set *CFG_INITIAL_POS_Y 1729
+set *CFG_FINAL_POS_X 1345
+set *CFG_FINAL_POS_Y 1740
+set *CFG_HEAL_POS_X 1348
+set *CFG_HEAL_POS_Y 1744
+
+; =========================
+; CURACION
+; =========================
+set *CFG_PILON_AGUA_ID PCGELPD
+
+; =========================
+; LOG
+; =========================
+set *CFG_LOG_LEVEL 3
+
+Event SysMessage [CONFIG] ARQUERIA lista
+exit

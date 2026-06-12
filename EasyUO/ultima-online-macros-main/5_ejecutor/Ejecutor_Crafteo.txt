@@ -1,0 +1,53 @@
+;============================================================
+;EJECUTOR CRAFTEO
+;============================================================
+;
+; Ejecuta la acción de crafteo según configuración.
+;
+; RESPONSABILIDAD:
+;  - Disparar la acción de crafteo del cliente
+;  - Respetar el tiempo de espera entre ciclos
+;
+; IMPORTANTE:
+;  Este ejecutor NO decide qué craftear.
+;  El comportamiento real se define en AssistUO mediante macro.
+;  Se espera un script en modo LOOP dentro de AssistUO.
+;
+;============================================================
+
+Ejecutor:
+
+    ; =========================================================
+    ; ESPERA CONTROLADA ENTRE CICLOS DE CRAFTEO
+    ; =========================================================
+    wait *CFG_TIME_ACCION
+
+exit
+
+
+; ============================================================
+; SCRIPT ASSISTUO (MACRO CRAFTEO EN LOOP)
+; ============================================================
+;
+; Este bloque representa el script que debe existir en AssistUO.
+; Se ejecuta en bucle continuo mientras el ejecutor lo llama.
+;
+; IMPORTANTE:
+; - Este código NO se ejecuta aquí
+; - Es SOLO referencia de configuración del cliente AssistUO
+; - Debe configurarse como macro en modo loop
+;
+; ============================================================
+
+; --------------------------
+;// BOWCRAFT -> 602 Astil
+;// BOWCRAFT -> 601 Flechas
+;// BOWCRAFT -> 603 Lote Flechas
+;// CARPENTRY -> 605 Mapas
+;// CARPENTRY -> 604
+;// TAILORING -> 601 Bandanas / Pergaminos
+; --------------------------
+
+;replygump 'any' 604
+;waitforgump 'any' 15000
+;pause 700

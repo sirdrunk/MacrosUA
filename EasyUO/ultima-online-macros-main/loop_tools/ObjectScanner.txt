@@ -1,0 +1,57 @@
+;============================================================
+;TILESCANNER
+;============================================================
+;
+; Herramienta de análisis de objetos alrededor del personaje.
+;
+; RESPONSABILIDAD:
+;  - Escanear los tiles cercanos al jugador
+;  - Mostrar tipo, nombre y flags de cada tile
+;  - Ayudar a configurar zonas para otros scripts
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO ejecuta acciones automáticas
+;   - NO mueve al personaje
+;   - NO interactúa con el entorno más allá de lectura de tiles
+;
+;  Es una herramienta de diagnóstico/configuración.
+;
+;============================================================
+
+tile init
+initEvents
+
+Event SysMessage [OBJECTSCAN] Pulsa ENTER para analizar el suelo (ESC para salir)
+
+set %tileZ 1
+
+mainLoop:
+
+OnHotKey ENTER
+gosub findAnimal
+
+OnHotKey ESC
+halt
+
+goto mainLoop
+
+
+sub findAnimal
+
+    Event SysMessage [OBJECTSCAN] encontrando animal
+
+    set %distance 2
+
+    findItem * G_ , %distance
+
+    if #findkind > -1
+    {
+        Event SysMessage [OBJECTSCAN] encontrado!!! #FINDTYPE #FINDID
+    }
+    else
+    {
+        Event SysMessage [OBJECTSCAN] nada, a seguir buscando
+    }
+
+return

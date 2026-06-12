@@ -1,0 +1,104 @@
+set %SCRIPT_MOVER_ITEMS *SCRIPT_DIR , aux_tools\ , Mover_Items.txt
+Preparador:
+    gosub MoverACasa
+    gosub AsegurarRecursos
+	gosub DejarItems
+	gosub MoverAForja
+    wait 1s
+exit
+
+sub MoverACasa
+
+move *CFG_CASA_INF_X *CFG_CASA_Y    
+
+return
+
+sub MoverAForja
+
+move *CFG_TRABAJO_X *CFG_TRABAJO_Y      
+
+return
+
+
+
+sub AsegurarRecursos
+    set %resource_index 0
+	    if *CFG_DROP_IN_BANK = 1
+    {
+        msg bank $
+        wait 2s
+	}
+    while %resource_index <= *CFG_RESOURCE_COUNT
+    {
+        gosub AsegurarRecurso %resource_index
+        set %resource_index %resource_index + 1
+    }
+return
+
+sub AsegurarRecurso
+    ; %1 = índice
+
+    set %type *CFG_RESOURCE_TYPE . %1
+    set %contenedor *CFG_RESOURCE_CONTAINER . %1
+	set %contenedor_objetivo *CFG_RESOURCE_CONTAINER_TO . %1
+	set %cantidadObjetivo *CFG_RESOURCE_QUANTITY . %1
+    gosub callScriptWithParams %SCRIPT_MOVER_ITEMS %type %contenedor %contenedor_objetivo %cantidadObjetivo
+
+return
+
+sub DejarItems
+    set %crafted_index 0
+
+    while %crafted_index <= *CFG_CRAFTED_COUNT
+    {
+        gosub DejarItem %crafted_index
+        set %crafted_index %crafted_index + 1
+    }
+return
+
+sub DejarItem
+    ; %1 = índice
+
+	set %type *CFG_CRAFTED_TYPE . %1
+    set %contenedor #BACKPACKID
+	set %contenedor_objetivo *CFG_CRAFTED_CONTAINER . %1
+	set %cantidadObjetivo -1
+
+    gosub callScriptWithParams %SCRIPT_MOVER_ITEMS %type %contenedor %contenedor_objetivo %cantidadObjetivo
+	wait 7
+return
+
+; ============================================================
+; CALL SCRIPT UTILITY
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

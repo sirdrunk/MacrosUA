@@ -1,0 +1,65 @@
+;============================================================
+;TILESCANNER
+;============================================================
+;
+; Herramienta de análisis del terreno alrededor del personaje.
+;
+; RESPONSABILIDAD:
+;  - Escanear los tiles cercanos al jugador
+;  - Mostrar tipo, nombre y flags de cada tile
+;  - Ayudar a configurar zonas para otros scripts
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO ejecuta acciones automáticas
+;   - NO mueve al personaje
+;   - NO interactúa con el entorno más allá de lectura de tiles
+;
+;  Es una herramienta de diagnóstico/configuración.
+;
+;============================================================
+
+tile init
+initEvents
+
+Event SysMessage [TILESCAN] Pulsa ENTER para analizar el suelo (ESC para salir)
+
+set %tileZ 1
+
+mainLoop:
+
+OnHotKey ENTER
+gosub ScanSuelo
+
+OnHotKey ESC
+halt
+
+goto mainLoop
+
+
+sub ScanSuelo
+
+    Event SysMessage --- ANALISIS DE SUELO ---
+
+    for %dx -1 1
+    {
+        for %dy -1 1
+        {
+            set %x #CHARPOSX + %dx
+            set %y #CHARPOSY + %dy
+
+            tile get %x %y %tileZ
+
+            set %tileType #TILETYPE
+            set %tileName #TILENAME
+            set %tileFlags #TILEFLAGS
+
+            Event SysMessage [ %dx | %dy | %tileZ ] , #spc , %tileType , #spc , %tileName , #spc , %tileFlags
+
+            wait 20
+        }
+    }
+
+    Event SysMessage -------------------------
+
+return

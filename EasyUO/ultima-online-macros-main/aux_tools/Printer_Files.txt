@@ -1,0 +1,52 @@
+;============================================================
+;PRINTER FILES
+;============================================================
+;
+; Escribe líneas de texto en ficheros del sistema.
+;
+; RESPONSABILIDAD:
+;  - Construir ruta de fichero destino
+;  - Escribir texto mediante consola de Windows
+;  - Permitir append o overwrite
+;
+; PARÁMETROS:
+;  %1 = texto a escribir
+;  %2 = fichero destino
+;  %3 = append
+;       1 = append
+;       0 = overwrite
+;
+; IMPORTANTE:
+;  Este script utiliza:
+;   - cmd.exe
+;   - redirección de consola
+;
+;  El fichero se genera dentro de:
+;   *SCRIPT_DIR
+;
+;============================================================
+
+initEvents
+
+; CARGAR PARÁMETROS
+set %LINE *param1
+set %FILE *SCRIPT_DIR , *param2
+set %APPEND *param3
+
+; VALOR POR DEFECTO
+if %APPEND <> 0
+    set %APPEND 1
+
+; DETERMINAR OPERADOR DE REDIRECCIÓN
+if %APPEND = 0
+    set %REDIR >
+else
+    set %REDIR >>
+
+; DEBUG
+Event SysMessage [PRINTER] Pintando linea
+
+; ESCRITURA EN FICHERO
+execute cmd.exe /c echo %LINE %REDIR %FILE
+
+exit

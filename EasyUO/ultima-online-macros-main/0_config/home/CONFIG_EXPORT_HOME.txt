@@ -1,0 +1,108 @@
+;============================================================
+; CONFIG EXPORT HOME
+;============================================================
+;
+; EXPORTADOR DE CONFIGURACIÓN DE CASA
+;
+; RESPONSABILIDAD:
+;  - Exporta toda la configuración relacionada con la casa
+;  - Genera fichero de configuración persistente
+;  - Usa Printer_Files como backend de escritura
+;
+; NO RESPONSABILIDADES:
+;  - No mueve al personaje
+;  - No ejecuta lógica de farmeo
+;  - No gestiona inventario en runtime
+;
+;============================================================
+
+; CONFIGURACIÓN EXPORTACIÓN
+set %HOME_ALIAS *param1
+
+set %EXPORT_FILE 0_config\home\ , CONFIG_HOME_ , %HOME_ALIAS , #dot , txt
+set %SCRIPT_PRINTER_FILES *SCRIPT_DIR , aux_tools\ , Printer_Files.txt
+
+set %APPEND_FALSE #false
+set %APPEND_TRUE #true
+
+set %SET se , t
+set %ASTERISCO *
+
+event ExMsg #charID 3 0 [EXPORT] Exportando configuracion en %EXPORT_FILE
+gosub ExportHome
+exit
+stop
+
+;============================================================
+; EXPORT HOME
+;============================================================
+sub ExportHome
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_DROP_IN_BANK , #spc , *CFG_DROP_IN_BANK
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_FALSE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_CENTER_X , #spc , *CFG_CASA_CENTER_X
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_SUP_X , #spc , *CFG_CASA_SUP_X
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_INF_X , #spc , *CFG_CASA_INF_X
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_Y , #spc , *CFG_CASA_Y
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_COFRE_X , #spc , *CFG_CASA_COFRE_X
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_COFRE_Y , #spc , *CFG_CASA_COFRE_Y
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_CASA_COFRE , #spc , *CFG_CASA_COFRE
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    event ExMsg #charID 3 0 [EXPORT] Casa exportada correctamente
+return
+
+;============================================================
+;CALL GENERICO CON PARAMETROS
+;============================================================
+;
+; Permite ejecutar scripts externos pasando parámetros.
+;
+; COMPORTAMIENTO:
+;  - El script recibe parámetros en *param0, *param1...
+;  - %1 siempre es el script y no se incluye en la lista final
+;
+;============================================================
+
+sub callScriptWithParams
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+
+return

@@ -1,0 +1,18 @@
+Event SysMessage [DEBUG] Pruebas
+msg bank $
+gosub dejando YLI C_ #BACKPACKID dropc #CONTID
+wait 5
+
+sub dejando
+    ; %1 = item
+    ; %2 = contenedor
+    ; %3 = acción drag/drop
+    ; %4..%6 = coordenadas opcionales
+    finditem %1 %2 , %3
+    exevent drag #FINDID #FINDSTACK
+    wait 7
+    exevent %4 %5 %6
+    wait 7
+return
+
+

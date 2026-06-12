@@ -1,0 +1,224 @@
+;============================================================
+; CONFIG GENERATOR HOME
+;============================================================
+;
+; GENERADOR INTERACTIVO DE CONFIGURACIÓN DE CASA
+;
+; RESPONSABILIDAD:
+;  - Permite definir configuración de casa o banco
+;  - Captura coordenadas del jugador como referencia
+;  - Permite seleccionar cofres y límites de zona
+;  - Exporta configuración final mediante EXPORTADOR
+;
+; NO RESPONSABILIDADES:
+;  - No ejecuta lógica de farmeo
+;  - No mueve al personaje automáticamente
+;  - No gestiona inventario en runtime
+;
+;============================================================
+
+initEvents
+
+; EXPORTADOR
+set %SCRIPT_EXPORTADOR *SCRIPT_DIR , 0_config\home\ , CONFIG_EXPORT_HOME.txt
+
+set %WAIT_TIME 1s
+
+; CONFIG MANUAL
+set %alias CasaDami
+
+;============================================================
+; SELECCION TIPO CASA
+;============================================================
+event ExMsg #charID 3 0 Pulsa ENTER para CASA o F2 para BANCO.
+wait %WAIT_TIME
+
+ElegirTipoCasa_Loop:
+OnHotKey ENTER
+gosub ElegirCasaNormal
+
+OnHotKey F2
+gosub ElegirCasaBanco
+
+goto ElegirTipoCasa_Loop
+
+;============================================================
+; BANCO
+;============================================================
+sub ElegirCasaBanco
+    set %casaTipo BANCO
+    event ExMsg #charID 3 0 Tipo BANCO seleccionado
+    goto DefinirCasaBanco
+return
+
+DefinirCasaBanco:
+event ExMsg #charID 3 0 Sitúate en el punto del banco y pulsa ENTER
+
+DefinirCasaBanco_Loop:
+OnHotKey ENTER
+gosub SeleccionarCasaBanco
+goto DefinirCasaBanco_Loop
+
+sub SeleccionarCasaBanco
+
+    set *CFG_DROP_IN_BANK 1
+
+    set *CFG_CASA_CENTER_X #CHARPOSX
+    set *CFG_CASA_SUP_X #CHARPOSX
+    set *CFG_CASA_INF_X #CHARPOSX
+    set *CFG_CASA_Y #CHARPOSY
+
+    set *CFG_CASA_COFRE_X #CHARPOSX
+    set *CFG_CASA_COFRE_Y #CHARPOSY
+    set *CFG_CASA_COFRE NoAplica
+
+    event ExMsg #charID 3 0 Casa tipo BANCO definida correctamente
+
+    goto preguntarExportar
+return
+
+;============================================================
+; CASA NORMAL
+;============================================================
+sub ElegirCasaNormal
+    set *CFG_DROP_IN_BANK 0
+    set %casaTipo CASA
+    event ExMsg #charID 3 0 Tipo CASA seleccionado
+    goto ElegirEsquinaCasa_1
+return
+
+ElegirEsquinaCasa_1:
+event ExMsg #charID 3 0 Sitúate en una esquina y pulsa ENTER
+
+ElegirEsquinaCasa_1_Loop:
+OnHotKey ENTER
+gosub SeleccionarEsquinaCasa_1
+goto ElegirEsquinaCasa_1_Loop
+
+sub SeleccionarEsquinaCasa_1
+    set *CFG_CASA_SUP_X #CHARPOSX
+    set *CFG_CASA_Y #CHARPOSY + 3
+    wait 10
+    goto ElegirCofre
+return
+
+ElegirCofre:
+event ExMsg #charID 3 0 Sitúate frente al cofre y pulsa ENTER
+
+ElegirCofreLoop:
+OnHotKey ENTER
+gosub SeleccionarCofreCoord
+goto ElegirCofreLoop
+
+sub SeleccionarCofreCoord
+    set *CFG_CASA_COFRE_X #CHARPOSX
+    set *CFG_CASA_COFRE_Y #CHARPOSY
+    wait 10
+    goto TargeteaCofre
+return
+
+TargeteaCofre:
+event ExMsg #charID 3 0 Targetea el cofre
+set #TARGCURS 1
+
+TargeteaCofreLoop:
+if #TARGCURS = 1
+    goto TargeteaCofreLoop
+
+set *CFG_CASA_COFRE #LTARGETID
+
+ElegirEsquinaCasa_2:
+event ExMsg #charID 3 0 Sitúate en la otra esquina y pulsa ENTER
+
+ElegirEsquinaCasa_2_Loop:
+OnHotKey ENTER
+gosub SeleccionarEsquinaCasa_2
+goto ElegirEsquinaCasa_2_Loop
+
+sub SeleccionarEsquinaCasa_2
+
+    set *CFG_CASA_INF_X #CHARPOSX
+
+    ; Normalización de extremos
+    if *CFG_CASA_SUP_X < *CFG_CASA_INF_X
+    {
+        set %tmp *CFG_CASA_SUP_X
+        set *CFG_CASA_SUP_X *CFG_CASA_INF_X
+        set *CFG_CASA_INF_X %tmp
+    }
+
+    set *CFG_CASA_CENTER_X *CFG_CASA_INF_X + ( ( *CFG_CASA_SUP_X - *CFG_CASA_INF_X ) / 2 )
+
+    set *CFG_CASA_SUP_X *CFG_CASA_SUP_X + 5
+    set *CFG_CASA_INF_X *CFG_CASA_INF_X - 5
+
+    wait 10
+    goto preguntarExportar
+return
+
+;============================================================
+; EXPORTACIÓN
+;============================================================
+preguntarExportar:
+event ExMsg #charID 3 0 ¿Quieres EXPORTAR la configuración? (S = Sí / N = No)
+
+preguntarExportar_loop:
+OnHotKey S
+gosub exportarConfig
+
+OnHotKey N
+gosub finTotal
+
+goto preguntarExportar_loop
+
+sub exportarConfig
+gosub callScriptWithParams %SCRIPT_EXPORTADOR %alias
+goto finTotal
+return
+
+sub finTotal
+event ExMsg #charID 3 0 Configuración finalizada
+exit
+stop
+
+;============================================================
+;CALL GENERICO CON PARAMETROS
+;============================================================
+;
+; Permite ejecutar scripts externos pasando parámetros.
+;
+; COMPORTAMIENTO:
+;  - El script recibe parámetros en *param0, *param1...
+;  - %1 siempre es el script y no se incluye en la lista final
+;
+;============================================================
+
+sub callScriptWithParams
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+
+return

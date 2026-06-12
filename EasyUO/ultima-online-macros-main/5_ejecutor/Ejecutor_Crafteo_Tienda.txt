@@ -1,0 +1,96 @@
+;============================================================
+;EJECUTOR CRAFTEO TIENDA
+;============================================================
+;
+;Ejecuta la acción de crafteo en entorno de tienda.
+;
+;RESPONSABILIDAD:
+;  - Ejecutar el objeto de crafteo si es necesario
+;  - Lanzar la acción definida por AssistUO (key)
+;  - Controlar número de usos por ciclo
+;
+;IMPORTANTE:
+;  Este ejecutor NO decide qué se fabrica.
+;  La lógica de crafting real depende del macro configurado en AssistUO.
+;  Este script solo sincroniza uso de objeto + acción.
+;============================================================
+
+Ejecutor:
+
+    set %actionUses 0
+
+    while %actionUses < *CFG_SKILL_ACTION_USES
+    {
+        set %actionUses %actionUses + 1
+
+        gosub UsarObjeto
+        gosub EjecutarAccion
+    }
+
+exit
+
+
+; ============================================================
+; ACCIÓN PRINCIPAL (ASSISTUO TRIGGER)
+; ============================================================
+;
+; Ejecuta la macro configurada en AssistUO mediante keybind.
+; Este es el punto de sincronización entre EasyUO y AssistUO.
+;
+; ============================================================
+
+sub EjecutarAccion
+
+    key *CFG_ACCION_KEY
+    wait *CFG_TIME_ACCION
+
+return
+
+
+; ============================================================
+; USO DE OBJETO DE CRAFTEO
+; ============================================================
+;
+; Gestiona el uso/equipado del objeto necesario para craftear.
+;
+; NOTA:
+; - Si CFG_SKILL_OBJECT_USEOBJECT = 1, se activa interacción manual
+; - Puede requerir target en AssistUO según el objeto
+;
+; ============================================================
+
+sub UsarObjeto
+
+    if *CFG_SKILL_OBJECT_USEOBJECT = 1
+    {
+        finditem *CFG_SKILL_OBJECT_TARGET C_ , #BACKPACKID
+
+        if #FINDCNT > 0
+        {
+            set #LTARGETID #FINDID
+            set #LTARGETKIND 1
+        }
+
+        set #LOBJECTID *skillObjectID
+        event macro 17 0
+
+        target 5s
+        event macro 22
+    }
+
+return
+
+
+; ============================================================
+; SCRIPT EASYUO ESPERADO
+; ============================================================
+
+;// BOWCRAFT -> 602 Astil
+;// BOWCRAFT -> 601 Flechas
+;// BOWCRAFT -> 603 Lote Flechas
+;// CARPENTRY -> 605 Mapas
+;// CARPENTRY -> 604
+;// TAILORING -> 601 Bandanas Pergaminos
+;replygump 'any' 604
+;waitforgump 'any' 15000
+;pause 700

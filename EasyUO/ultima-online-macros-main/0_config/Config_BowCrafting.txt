@@ -1,0 +1,62 @@
+Event SysMessage [CONFIG] Inicializando configuracion de BOWCRAFTING
+
+; =========================
+; INSTRUCCIONES
+; =========================
+
+; Siturarse frente a un cofre que tenga los recursos de crafteo
+; Los contenedores y bolsas deben estar visibles en la pantalla
+; Revisar los Ids de los contenedores para adaptarlos a tu situacion.
+; Para el crafteo, se suelen utilizar scripts de assistUO ejecutados en loop. Revisar el ejecutor o el preparador.
+; Tener abierto el gump de bowcrafting con la pagina donde se fabrican las flechas
+
+; =========================
+; FICHEROS
+; =========================
+set *CFG_SCRIPT_ORQUESTADOR Orquestador.txt
+set *CFG_SCRIPT_INICIALIZADOR Inicializador_Vacio.txt
+set *CFG_SCRIPT_PREPARADOR Preparador_Crafteo.txt
+set *CFG_SCRIPT_EJECUTOR Ejecutor_Crafteo.txt
+
+
+; =========================
+; RESOURCES
+; =========================
+set *CFG_RESOURCE_TYPE0 ZLK
+set *CFG_RESOURCE_QUANTITY0 40
+set *CFG_RESOURCE_CONTAINER0 LQQVGQD ;***********	Contenedor de casa con troncos
+set *CFG_RESOURCE_COUNT 0
+; =========================
+; SKILL
+; =========================
+set *CFG_SKILL_NAME BOWCRAFT
+set *CFG_SKILL_USE Bowcraft
+set *CFG_SKILL_REQUIRES_OBJECT 1
+set *CFG_SKILL_EQUIP_OBJECT 0
+set *CFG_SKILL_OBJECT_TYPE TSF_WSF
+set *CFG_SKILL_OBJECT_CONTAINER HYYAYMD ;***********	Contenedor de casa con dagas
+set *CFG_SKILL_OBJECT_USEOBJECT 1
+set *CFG_SKILL_OBJECT_USETARGET 1
+set *CFG_SKILL_OBJECT_TARGET ZLK
+
+; =========================
+; CRAFTED_ITEMS
+; =========================
+set *CFG_CRAFTED_TYPE0 SLK ;Astiles
+set *CFG_CRAFTED_CONTAINER0 TIUQGQD ;***********	Contenedor para guardar astiles
+set *CFG_CRAFTED_COUNT 0
+
+; =========================
+; TIEMPOS
+; =========================
+set *CFG_TIME_ACCION 2s
+set *CFG_TIMEOUT_ACCION 120000
+
+
+; =========================
+; LOG
+; =========================
+set *CFG_LOG_LEVEL 3
+
+Event SysMessage [CONFIG] BOWCRAFTING lista
+exit

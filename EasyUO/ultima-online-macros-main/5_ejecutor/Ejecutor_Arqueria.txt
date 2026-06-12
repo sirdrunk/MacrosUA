@@ -1,0 +1,65 @@
+; ============================================================
+; EJECUTOR ARQUERIA
+; ============================================================
+;
+; Ejecuta la acción principal de la skill de arquearía.
+;
+; Responsabilidad:
+;   - Ejecutar acción repetida configurada
+;   - Controlar número de usos por ciclo
+;
+; No decide targets.
+; No mueve al personaje.
+; Solo ejecuta acción definida en config.
+;
+; ============================================================
+
+
+Ejecutor:
+
+    set %actionUses 0
+
+    while %actionUses < *CFG_SKILL_ACTION_USES
+    {
+        set %actionUses %actionUses + 1
+        gosub EjecutarAccion
+    }
+
+exit
+
+
+; ============================================================
+; ACCIÓN DE EJECUCIÓN (ASSISTUO MACRO EMBEBIDA)
+; ============================================================
+;
+; Esta sección contiene la macro exacta ejecutada por AssistUO.
+; Puede copiarse directamente en el cliente como macro independiente.
+;
+; Flujo:
+;   1. Busca enemigo válido:
+;        murderer / enemy / criminal / closest
+;   2. Asigna target como "enemigo"
+;   3. Ejecuta ataque sobre el target
+;   4. Espera cooldown entre disparos
+;
+; ============================================================
+
+sub EjecutarAccion
+
+    ; ========================================================
+    ; ASSISTUO MACRO (COPIABLE TAL CUAL AL CLIENTE)
+    ; ========================================================
+    ;
+    ; getenemy 'murderer' 'enemy' 'criminal' 'closest'
+    ; setalias 'enemigo' 'last'
+    ; // Atacar
+    ; attack 'enemigo'
+    ; // Tiempo entre disparos (600?700 ms para arco)
+    ; pause 3000
+    ;
+    ; ========================================================
+
+    key *CFG_ACCION_KEY
+    wait *CFG_TIME_ACCION
+
+return

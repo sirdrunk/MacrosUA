@@ -1,0 +1,68 @@
+;============================================================
+;MOVER A LUGAR
+;============================================================
+;
+; Equipa al personaje con el objeto indicado.
+;
+; RESPONSABILIDAD:
+;  - Buscar arma en manos
+;  - Buscar arma en mochila
+;  - Confirmar si se equipo el arma
+;
+; PARÁMETROS:
+;  %1 = itemType o Id a buscar
+;
+; RETORNO:
+;  *returned0 = NNNN -> Id del objeto equipado
+;  *returned0 = 0 -> No Equipado
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO hace pathfinding avanzado
+;   - NO cambia zonas
+;   - NO analiza obstáculos complejos
+;
+;  Solo verifica distancia simple y ejecuta move.
+;
+;============================================================
+
+initEvents
+
+gosub EquiparArma *param1
+
+exit
+
+sub EquiparArma
+
+	set %itemType *param1
+	set *returned0 0
+
+    ; equipado
+    finditem %itemType C_ , #CHARID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [INICIADOR] objeto equipado
+        set *returned0 #FINDID
+        return
+    }
+
+
+    ; mochila
+    finditem %itemType C_ , #BACKPACKID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [INICIADOR] objeto en mochila
+        set *returned0 #FINDID
+
+        set %previousLastObject #LOBJECTID
+		set #LOBJECTID *returned0
+		event macro 17 0
+		wait 7
+		Event SysMessage [INICIADOR] objeto equipado
+	
+        return
+    }
+
+return

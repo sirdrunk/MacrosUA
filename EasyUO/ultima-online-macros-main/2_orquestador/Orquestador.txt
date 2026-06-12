@@ -1,0 +1,89 @@
+; ################################################################
+; # ORQUESTADOR (LOOP VIVO)
+; ################################################################
+;
+; Coordina el flujo principal del framework modular.
+;
+; Ejecuta:
+;   - inicializador (una vez)
+;   - preparador (por ciclo)
+;   - ejecutor (por ciclo)
+;
+; Finaliza cuando *STATE = -1
+
+
+; ============================================================
+; VARIABLES ESPERADAS
+; ============================================================
+
+; *SCRIPT_DIR
+;     Ruta base del framework
+
+; *CFG_SCRIPT_INICIALIZADOR
+;     Script de inicialización
+
+; *CFG_SCRIPT_PREPARADOR
+;     Script de preparación de acciones
+
+; *CFG_SCRIPT_EJECUTOR
+;     Script de ejecución de acciones
+
+; *STATE
+;     Estado global del sistema
+;       0  -> ejecución normal
+;      -1  -> finalizar
+
+
+; ============================================================
+; RESOLUCIÓN DE SCRIPTS
+; ============================================================
+
+set *STATE 0
+
+set %SCRIPT_INICIALIZADOR *SCRIPT_DIR , 3_inicializador\ , *CFG_SCRIPT_INICIALIZADOR
+set %SCRIPT_PREPARADOR    *SCRIPT_DIR , 4_preparador\    , *CFG_SCRIPT_PREPARADOR
+set %SCRIPT_EJECUTOR      *SCRIPT_DIR , 5_ejecutor\      , *CFG_SCRIPT_EJECUTOR
+
+
+; ============================================================
+; INICIALIZADOR (UNA SOLA VEZ)
+; ============================================================
+
+Event SysMessage [ORQ] Iniciado %SCRIPT_INICIALIZADOR
+call %SCRIPT_INICIALIZADOR
+wait 5
+
+
+; ============================================================
+; LOOP PRINCIPAL
+; ============================================================
+
+MainLoop:
+
+    ; prepara siguiente acción
+    Event SysMessage [ORQ] Preparar
+    call %SCRIPT_PREPARADOR
+    wait 5
+
+    ; ejecuta acción principal
+    Event SysMessage [ORQ] Ejecutar
+    call %SCRIPT_EJECUTOR
+    wait 5
+
+    ; check de finalización
+    if *STATE = -1
+    {
+        Event SysMessage [ORQ] Finalizado
+        goto End
+    }
+
+    wait 15
+    goto MainLoop
+
+
+; ============================================================
+; FIN ORQUESTADOR
+; ============================================================
+
+End:
+exit

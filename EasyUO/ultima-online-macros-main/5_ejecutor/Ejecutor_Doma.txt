@@ -1,0 +1,346 @@
+;============================================================
+;EJECUTOR DOMA (TAMING + COMBATE + LIMPIEZA)
+;============================================================
+;
+;Ejecuta el flujo completo de interacción con animales:
+;  - Doma (Animal Taming)
+;  - Validación de resultado mediante journal
+;  - Combate si falla la doma
+;  - Ignorar o limpiar objetivo según configuración
+;
+;RESPONSABILIDAD:
+;  - Ejecutar skill de doma sobre *ANIMAL_TARGET_ID
+;  - Analizar resultado de la acción
+;  - Resolver estado del animal (domado / ignorado / muerto)
+;
+;IMPORTANTE:
+;  Este script NO selecciona animales.
+;  El objetivo ya viene definido por el PREPARADOR:
+;      *ANIMAL_TARGET_ID
+;      *ANIMAL_POSICION_X / Y
+;
+;  El flujo depende completamente del journal del cliente.
+;
+;============================================================
+
+inicio:
+set %RESULT_FAIL 1
+set %RESULT_WAIT 2
+set %RESULT_OK 0
+
+set %SCRIPT_MOVERALUGAR *SCRIPT_DIR , aux_tools\ , Mover_A_Lugar.txt
+set %SCRIPT_EQUIPAR_ARMA *SCRIPT_DIR , aux_tools\ , Equipar_Item.txt
+gosub EjecutarAccion
+exit
+
+
+;============================================================
+; FLUJO PRINCIPAL
+;============================================================
+sub EjecutarAccion
+
+    if *ANIMAL_TARGET_ID = -1
+        return
+
+    set *TAMING_SUCCESS 0
+
+    ;--------------------------------------------------------
+    ; 1) INTENTO DE DOMA
+    ;--------------------------------------------------------
+    gosub DomarAnimal
+
+    msg all release $
+
+    ;--------------------------------------------------------
+    ; 2) RESOLUCIÓN DE RESULTADO
+    ;--------------------------------------------------------
+    gosub callScriptWithParams %SCRIPT_EQUIPAR_ARMA *CFG_ANIMAL_KILL_WEAPONS
+	if *CFG_TAMING_FORCE_KILL_ON_FAIL = 1 && %ANIMAL_IS_ALREADY_TAMED = 1 && returned0 <> 0
+    {
+        gosub MatarAnimal
+    }
+    else
+    {
+        gosub AddAnimalToIgnoreList
+    }
+
+return
+
+
+;============================================================
+; DOMA (CICLO CONTROLADO + JOURNAL ANALYSIS)
+;============================================================
+sub DomarAnimal
+
+    set *TAMING_SUCCESS 0
+    set %intentos 0
+
+    if *DEBUGMODE = 1
+        Event SysMessage [TAMING] Iniciando doma
+
+    repeat
+    {
+        ;----------------------------------------------------
+        ; VALIDACIÓN DE EXISTENCIA DEL OBJETIVO
+        ;----------------------------------------------------
+        finditem *ANIMAL_TARGET_ID
+        if #findkind = -1
+            return
+
+        gosub AcercarseAnimal
+
+        ;----------------------------------------------------
+        ; EJECUCIÓN SKILL TAMING
+        ;----------------------------------------------------
+		Event SysMessage [TAMING] Iniciando doma
+		wait 50
+        event macro 13 35
+		target 3s		
+        set #LTARGETID *ANIMAL_TARGET_ID
+		set #lTargetKind 1
+		gosub AcercarseAnimal
+		event Macro 22
+		
+		wait 100
+		
+        gosub EsperarResultado
+
+        ;----------------------------------------------------
+        ; RESULTADO OK
+        ;----------------------------------------------------
+        if %resultado = %RESULT_OK
+        {
+            set *TAMING_SUCCESS 1
+
+            if *DEBUGMODE = 1
+                Event SysMessage [TAMING] DOMADO CON EXITO
+
+            return
+        }
+
+        ;----------------------------------------------------
+        ; RESULTADO FAIL
+        ;----------------------------------------------------
+        if %resultado = %RESULT_FAIL
+        {
+            if *DEBUGMODE = 1
+                Event SysMessage [TAMING] FAIL DETECTADO
+
+            if *CFG_TAMING_RETRY_ON_FAIL = 0
+                return
+        }
+
+        set %intentos %intentos + 1
+
+        if %intentos >= *CFG_TAMING_MAX_INTENTOS
+        {
+            if *DEBUGMODE = 1
+                Event SysMessage [TAMING] MAX INTENTOS ALCANZADO
+
+            return
+        }
+
+    }
+    until 0
+
+return
+
+
+;============================================================
+; ESPERA Y ANALISIS DE JOURNAL
+;============================================================
+sub EsperarResultado
+
+    set %resultado %RESULT_WAIT
+    set %startTime #SYSTIME
+
+    repeat
+        set %journalEnd #JINDEX
+        gosub AnalizarResultado
+		set %journalStart %journalEnd
+        if %resultado = %RESULT_OK || %resultado = %RESULT_FAIL
+            return
+
+        if #SYSTIME - %startTime > *CFG_TIMEOUT_ACCION
+        {
+            Event SysMessage [EJECUTOR] TIMEOUT SKILL
+            set %resultado %RESULT_FAIL
+            return
+        }
+
+        gosub AcercarseAnimal
+        wait 50
+
+    until 0
+
+return
+
+
+;============================================================
+; ANALISIS DE JOURNAL (RESULTADO SKILL)
+;============================================================
+sub AnalizarResultado
+	set %ANIMAL_IS_ALREADY_TAMED 0
+    for %journalIndex %journalStart %journalEnd
+    {
+        set %journalIndexToFind #JINDEX - %journalIndex
+        scanjournal %journalIndexToFind
+
+        ;-------------------------
+        ; FAIL DETECTION
+        ;-------------------------
+        for %failIndex 0 *CFG_FAIL_COUNT
+        {
+
+			if *CFG_FAIL . %failIndex in #JOURNAL
+            {
+                Event SysMessage [EJECUTOR_DOMA] FAIL DETECTADO
+                set %resultado %RESULT_FAIL
+				
+				
+                return
+            }
+        }
+
+        ;-------------------------
+        ; SUCCESS DETECTION
+        ;-------------------------
+        for %okIndex 0 *CFG_OK_COUNT
+        {
+            
+			if *CFG_OK . %okIndex in #JOURNAL
+            {
+                Event SysMessage [EJECUTOR_DOMA] DOMA OK
+                set %resultado %RESULT_OK
+				if *CFG_ALREADY_TAMED_MSG in *CFG_OK . %okIndex
+				{
+				 set %ANIMAL_IS_ALREADY_TAMED 1
+				}
+                return
+            }
+        }
+    }
+
+return
+
+
+;============================================================
+; ACERCAMIENTO AL OBJETIVO
+;============================================================
+sub AcercarseAnimal
+
+    finditem *ANIMAL_TARGET_ID
+    if #findkind = -1
+        return
+
+    set %x #findx
+    set %y #findy
+
+    gosub callScriptWithParams %SCRIPT_MOVERALUGAR %x %y 0 3s
+
+return
+
+
+;============================================================
+; IGNORAR ANIMAL (LISTA INTERNA + IGNORE CLIENTE)
+;============================================================
+sub AddAnimalToIgnoreList
+
+    if *ANIMAL_TARGET_ID = -1
+        return
+
+    if *ANIMALS_IGNORED_LIST <> ""
+    {
+        if *ANIMAL_TARGET_ID in *ANIMALS_IGNORED_LIST
+            return
+    }
+
+    if *ANIMALS_IGNORED_LIST = ""
+        set *ANIMALS_IGNORED_LIST *ANIMAL_TARGET_ID
+    else
+        set *ANIMALS_IGNORED_LIST *ANIMALS_IGNORED_LIST , _ , *ANIMAL_TARGET_ID
+
+    ignoreitem *ANIMAL_TARGET_ID 1
+
+    if *DEBUGMODE = 1
+        Event SysMessage [IGNORE] Añadido: *ANIMAL_TARGET_ID
+
+return
+
+
+;============================================================
+; COMBATE (KILL SI FALLA DOMA)
+;============================================================
+sub MatarAnimal
+
+    if *CFG_TAMING_FORCE_KILL_ON_FAIL = 0
+        return
+
+    if *DEBUGMODE = 1
+        Event SysMessage [COMBAT] Iniciando limpieza
+	set %intentos_matar 0
+    repeat
+    {
+        finditem *ANIMAL_TARGET_ID G_
+        if #findkind = -1
+            return
+
+        set #LTARGETID *ANIMAL_TARGET_ID
+        event macro 27 0
+
+        gosub AcercarseAnimal
+        wait 1s
+		if %intentos_matar > *CFG_TAMING_KILL_MAX_INTENTOS
+		{
+		return
+		}
+		set %intentos_matar %intentos_matar + 1
+    }
+    until 0
+
+return
+
+
+;============================================================
+; DEBUG
+;============================================================
+sub pauseDebug
+    if *DEBUGMODE = 1
+        pause
+return
+
+
+; ============================================================
+; CALL SCRIPT UTILITY
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

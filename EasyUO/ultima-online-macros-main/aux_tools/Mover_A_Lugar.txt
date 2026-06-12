@@ -1,0 +1,111 @@
+;============================================================
+;MOVER A LUGAR
+;============================================================
+;
+; Mueve al personaje hasta una posición objetivo.
+;
+; RESPONSABILIDAD:
+;  - Verificar si el personaje ya está en rango
+;  - Ejecutar movimiento hacia coordenadas objetivo
+;  - Confirmar si se alcanzó la distancia requerida
+;
+; PARÁMETROS:
+;  %1 = posicionX
+;  %2 = posicionY
+;  %3 = distanciaMaxima
+;  %4 = timeout
+;
+; RETORNO:
+;  *returned0 = 1 -> posición alcanzada
+;  *returned0 = 0 -> no alcanzada
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO hace pathfinding avanzado
+;   - NO cambia zonas
+;   - NO analiza obstáculos complejos
+;
+;  Solo verifica distancia simple y ejecuta move.
+;
+;============================================================
+
+initEvents
+
+gosub MoverATileAdyacente *param1 *param2 *param3 *param4
+
+exit
+
+
+sub MoverATileAdyacente
+
+    ; %1 posicionX
+    ; %2 posicionY
+    ; %3 distanciaMaxima
+    ; %4 timeout
+
+    set %MoverATileAdyacente_X %1
+    set %MoverATileAdyacente_Y %2
+    set %MoverATileAdyacente_dist %3
+    set %MoverATileAdyacente_timeout %4
+
+    set *returned0 0
+
+    if *DEBUGMODE = 1
+    {
+        Event SysMessage [TEST_TEMPORAL] %MoverATileAdyacente_X %MoverATileAdyacente_Y %MoverATileAdyacente_dist
+    }
+
+    ; COMPROBAR SI YA ESTAMOS EN RANGO
+    gosub EstoyEnTileAdyacente %MoverATileAdyacente_X %MoverATileAdyacente_Y %MoverATileAdyacente_dist
+
+    if %isAdjacent = 1
+    {
+        set *returned0 1
+        return
+    }
+
+    ; MOVER PERSONAJE
+    move %MoverATileAdyacente_X %MoverATileAdyacente_Y %MoverATileAdyacente_dist %MoverATileAdyacente_timeout
+
+    ; REVALIDAR DISTANCIA
+    gosub EstoyEnTileAdyacente %MoverATileAdyacente_X %MoverATileAdyacente_Y %MoverATileAdyacente_dist
+
+    if %isAdjacent = 1
+    {
+        set *returned0 1
+        return
+    }
+
+return
+
+
+sub EstoyEnTileAdyacente
+
+    ; %1 posicionX
+    ; %2 posicionY
+    ; %3 distanciaMaxima
+
+    ; Devuelve:
+    ; %isAdjacent = 1 / 0
+
+    set %isAdjacent 0
+
+    ; DISTANCIA X
+    set %dx #CHARPOSX - %1
+
+    if %dx < 0
+        set %dx %dx * -1
+
+    ; DISTANCIA Y
+    set %dy #CHARPOSY - %2
+
+    if %dy < 0
+        set %dy %dy * -1
+
+    ; VALIDAR DISTANCIA
+    if %dx <= %3 && %dy <= %3
+    {
+        set %isAdjacent 1
+    }
+
+return

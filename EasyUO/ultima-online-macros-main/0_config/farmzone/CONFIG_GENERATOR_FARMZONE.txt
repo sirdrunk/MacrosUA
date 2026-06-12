@@ -1,0 +1,289 @@
+;============================================================
+; CONFIG GENERATOR FARMZONE
+;============================================================
+;
+; GENERADOR INTERACTIVO DE FARMZONES
+;
+; RESPONSABILIDAD:
+;  - Permite crear farmzones manualmente en el cliente
+;  - Configura CENTER o CORNERS por zona
+;  - Calcula automáticamente tamaños o esquinas
+;  - Permite encadenar múltiples farmzones
+;  - Exporta la configuración final a fichero
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO ejecuta farmeo
+;   - NO mueve al personaje en automático
+;   - NO analiza combate ni recursos
+;
+;  Solo genera configuración de zonas.
+;
+;============================================================
+
+initEvents
+
+; EXPORTADOR
+set %SCRIPT_EXPORTADOR *SCRIPT_DIR , 0_config\farmzone\ , CONFIG_EXPORT_FARMZONE.txt
+
+set %WAIT_TIME 1s
+
+; CONFIG MANUAL
+set %alias DomaYew
+set %wrap 5
+
+set %subfarmzoneSizeX 10
+set %subfarmzoneSizeY 10
+
+set %farmZoneIndex 0
+
+goto elegirTipoFarmZone
+
+;============================================================
+; SELECCION DE TIPO DE FARMZONE
+;============================================================
+elegirTipoFarmZone:
+event ExMsg #charID 3 0 Elige tipo de FarmZone %farmZoneIndex : F1 = CENTER | F2 = CORNERS
+wait %WAIT_TIME
+
+elegirTipoFarmZone_loop:
+OnHotKey F1
+gosub tipoCenter
+
+OnHotKey F2
+gosub tipoCorners
+
+goto elegirTipoFarmZone_loop
+
+sub tipoCenter
+set *CFG_FARMZONE_DEFINITION . %farmZoneIndex CENTER
+set *CFG_FARMZONE_ZONE_SIZE_X . %farmZoneIndex %subfarmzoneSizeX
+set *CFG_FARMZONE_ZONE_SIZE_Y . %farmZoneIndex %subfarmzoneSizeY
+set %farmZoneType CENTER
+goto elegirParametro1
+return
+
+sub tipoCorners
+set *CFG_FARMZONE_DEFINITION . %farmZoneIndex CORNERS
+set *CFG_FARMZONE_ZONE_SIZE_X . %farmZoneIndex %subfarmzoneSizeX
+set *CFG_FARMZONE_ZONE_SIZE_Y . %farmZoneIndex %subfarmzoneSizeY
+set %farmZoneType CORNERS
+goto elegirParametro1
+return
+
+;============================================================
+; PARAMETRO 1
+;============================================================
+elegirParametro1:
+
+if %farmZoneType = CENTER
+    event ExMsg #charID 3 0 Sitúate en el CENTRO y pulsa ENTER
+else
+    event ExMsg #charID 3 0 Sitúate en la ESQUINA SUPERIOR IZQUIERDA y pulsa ENTER
+
+wait %WAIT_TIME
+
+elegirParametro1_loop:
+OnHotKey ENTER
+gosub guardarParametro1
+goto elegirParametro1_loop
+
+sub guardarParametro1
+
+if %farmZoneType = CENTER
+{
+    set *CFG_FARMZONE_CENTER_X . %farmZoneIndex #CHARPOSX
+    set *CFG_FARMZONE_CENTER_Y . %farmZoneIndex #CHARPOSY
+}
+else
+{
+    set *CFG_FARMZONE_TOP_LEFT_X . %farmZoneIndex #CHARPOSX
+    set *CFG_FARMZONE_TOP_LEFT_Y . %farmZoneIndex #CHARPOSY
+}
+
+goto elegirParametro2
+return
+
+;============================================================
+; PARAMETRO 2
+;============================================================
+elegirParametro2:
+
+if %farmZoneType = CENTER
+    event ExMsg #charID 3 0 Muévete a una ESQUINA y pulsa ENTER
+else
+    event ExMsg #charID 3 0 Sitúate en la ESQUINA INFERIOR DERECHA y pulsa ENTER
+
+wait %WAIT_TIME
+
+elegirParametro2_loop:
+OnHotKey ENTER
+gosub guardarParametro2
+goto elegirParametro2_loop
+
+sub guardarParametro2
+
+if %farmZoneType = CENTER
+{
+    set %dx #CHARPOSX - *CFG_FARMZONE_CENTER_X . %farmZoneIndex
+    if %dx < 0
+        set %dx %dx * -1
+
+    set %dy #CHARPOSY - *CFG_FARMZONE_CENTER_Y . %farmZoneIndex
+    if %dy < 0
+        set %dy %dy * -1
+
+    set *CFG_FARMZONE_SIZE_X . %farmZoneIndex %dx * 2
+    set *CFG_FARMZONE_SIZE_Y . %farmZoneIndex %dy * 2
+}
+else
+{
+    set %x1 *CFG_FARMZONE_TOP_LEFT_X . %farmZoneIndex
+    set %y1 *CFG_FARMZONE_TOP_LEFT_Y . %farmZoneIndex
+
+    set %x2 #CHARPOSX
+    set %y2 #CHARPOSY
+
+    if %x1 < %x2
+    {
+        set *CFG_FARMZONE_TOP_LEFT_X . %farmZoneIndex %x1
+        set *CFG_FARMZONE_BOT_RIGHT_X . %farmZoneIndex %x2
+    }
+    else
+    {
+        set *CFG_FARMZONE_TOP_LEFT_X . %farmZoneIndex %x2
+        set *CFG_FARMZONE_BOT_RIGHT_X . %farmZoneIndex %x1
+    }
+
+    if %y1 < %y2
+    {
+        set *CFG_FARMZONE_TOP_LEFT_Y . %farmZoneIndex %y1
+        set *CFG_FARMZONE_BOT_RIGHT_Y . %farmZoneIndex %y2
+    }
+    else
+    {
+        set *CFG_FARMZONE_TOP_LEFT_Y . %farmZoneIndex %y2
+        set *CFG_FARMZONE_BOT_RIGHT_Y . %farmZoneIndex %y1
+    }
+}
+
+goto preguntarSiguienteFarmzone
+return
+
+;============================================================
+; FLUJO DE CONTINUACION
+;============================================================
+preguntarSiguienteFarmzone:
+event ExMsg #charID 3 0 ¿Quieres definir otra FarmZone? (S = Sí / N = No)
+
+preguntarSiguienteFarmzone_loop:
+OnHotKey S
+gosub siguienteFarmZone
+
+OnHotKey N
+gosub finGenerador
+
+goto preguntarSiguienteFarmzone_loop
+
+sub siguienteFarmZone
+set %farmZoneIndex %farmZoneIndex + 1
+goto elegirTipoFarmZone
+return
+
+sub finGenerador
+set *CFG_FARM_ZONE_COUNT %farmZoneIndex
+goto preguntarCircular
+return
+
+;============================================================
+; CIRCULARIDAD
+;============================================================
+preguntarCircular:
+event ExMsg #charID 3 0 ¿Las FarmZones son CIRCULARES? (S = Sí / N = No)
+
+preguntarCircular_loop:
+OnHotKey S
+gosub circularSi
+
+OnHotKey N
+gosub circularNo
+
+goto preguntarCircular_loop
+
+sub circularSi
+set *CFG_FARMZONE_CIRCULAR 1
+set *CFG_FARMZONE_WRAP_FROM %wrap
+goto preguntarExportar
+return
+
+sub circularNo
+set *CFG_FARMZONE_CIRCULAR 0
+goto preguntarExportar
+return
+
+;============================================================
+; EXPORTACION
+;============================================================
+preguntarExportar:
+event ExMsg #charID 3 0 ¿Quieres EXPORTAR la configuración? (S = Sí / N = No)
+
+preguntarExportar_loop:
+OnHotKey S
+gosub exportarConfig
+
+OnHotKey N
+gosub finTotal
+
+goto preguntarExportar_loop
+
+sub exportarConfig
+gosub callScriptWithParams %SCRIPT_EXPORTADOR %alias
+goto finTotal
+return
+
+sub finTotal
+event ExMsg #charID 3 0 Configuración finalizada.
+halt
+stop
+
+;============================================================
+;CALL GENERICO CON PARAMETROS
+;============================================================
+;
+; Permite ejecutar scripts externos pasando parámetros.
+;
+; COMPORTAMIENTO:
+;  - El script recibe parámetros en *param0, *param1...
+;  - %1 siempre es el script y no se incluye en la lista final
+;
+;============================================================
+
+sub callScriptWithParams
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+
+return

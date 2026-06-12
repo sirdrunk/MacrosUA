@@ -1,0 +1,18 @@
+; ============================================================
+; PREPARADOR VACÍO
+; ============================================================
+;
+; Módulo de preparación sin lógica activa.
+;
+; Su única función es:
+;   - Mantener compatibilidad con el ORQUESTADOR
+;   - Evitar errores por ausencia de script preparador
+;
+; No realiza movimientos.
+; No selecciona objetivos.
+; No modifica estado global.
+;
+; ============================================================
+
+Preparador:
+exit

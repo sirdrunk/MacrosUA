@@ -1,0 +1,205 @@
+;============================================================
+;VUELTA CASA
+;============================================================
+;
+; Gestiona el proceso completo de vuelta a casa del personaje.
+;
+; RESPONSABILIDAD:
+;  - Guardar posición de trabajo actual
+;  - Volver a la zona inicial del farm
+;  - Desplazarse hasta la casa
+;  - Depositar recursos configurados
+;  - Regresar a la posición de trabajo
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO decide cuándo volver a casa
+;   - NO selecciona recursos
+;   - NO modifica el flujo global
+;
+;  Solo ejecuta la rutina logística de depósito y retorno.
+;
+; DEPENDENCIAS:
+;  - ZoneShifter.txt
+;  - Configuración de casa y cofres
+;  - Variables de farmzone activas
+;
+;============================================================
+
+set %SCRIPT_ZONE_SHIFTER *SCRIPT_DIR , aux_tools/ , ZoneShifter.txt
+
+gosub pacasa
+gosub pauseDebug
+
+exit
+
+
+; ============================================================
+; FLUJO PRINCIPAL DE VUELTA
+; ============================================================
+
+sub pacasa
+
+    Event SysMessage [VUELTA] Volviendo a casa
+
+    ; GUARDAR POSICIÓN DE TRABAJO
+    set %workPosX #CHARPOSX
+    set %workPosY #CHARPOSY
+
+    ; VOLVER A ZONA 0
+    set %MODE GOTO_ZERO
+    gosub callScriptWithParams %SCRIPT_ZONE_SHIFTER %MODE
+
+    if *DEBUGMODE = 1
+        Event SysMessage [VUELTA] En zona 0, moviendo hacia la casa
+
+    ; IR A CASA Y DEPOSITAR
+    gosub moveACasa
+
+    ; RESTAURAR ZONA ORIGINAL
+    set %MODE GOTO_ZONE
+    set %workingFarmZone *farmzone
+
+    gosub callScriptWithParams %SCRIPT_ZONE_SHIFTER %MODE *farmzone
+
+    Event SysMessage [VUELTA] Moviendose hacia la posicion de trabajo
+
+    ; VOLVER A POSICIÓN ORIGINAL
+    move %workPosX %workPosY 0
+
+return
+
+
+; ============================================================
+; MOVIMIENTO Y DEPÓSITO EN CASA
+; ============================================================
+
+sub moveACasa
+
+    ; GUARDAR POSICIÓN TEMPORAL
+    set %tempPosX #CHARPOSX
+    set %tempPosY #CHARPOSY
+
+    ; MOVIMIENTO HACIA CASA
+    if %tempPosX <= 290
+        move 3225 289
+
+    if #CHARPOSY <= *CFG_CASA_Y && #CHARPOSX <= *CFG_CASA_CENTER_X
+        move *CFG_CASA_INF_X *CFG_CASA_Y
+
+    if #CHARPOSY <= *CFG_CASA_Y && #CHARPOSX > *CFG_CASA_CENTER_X
+        move *CFG_CASA_SUP_X *CFG_CASA_Y
+
+    ; APERTURA DE BANCO O COFRE
+    if *CFG_DROP_IN_BANK = 1
+    {
+        msg bank $
+        wait 2s
+
+        set %destinationCotainer *CFG_CASA_COFRE
+    }
+    else
+    {
+        move *CFG_CASA_COFRE_X *CFG_CASA_COFRE_Y 0
+
+        set %destinationCotainer *CFG_CASA_COFRE
+    }
+
+    ; DEPOSITAR ITEMS CONFIGURADOS
+    for %itemIndex 0 *CFG_ITEM_RECOGIDA_COUNT
+    {
+        gosub dejando *CFG_ITEM_RECOGIDA . %itemIndex C_ #BACKPACKID dropc %destinationCotainer
+    }
+
+    ; SALIDA DE CASA
+    if %tempPosY <= *CFG_CASA_Y && %tempPosX <= *CFG_CASA_CENTER_X
+        move *CFG_CASA_INF_X *CFG_CASA_Y
+
+    if %tempPosY <= *CFG_CASA_Y && %tempPosX > *CFG_CASA_CENTER_X
+        move *CFG_CASA_SUP_X *CFG_CASA_Y
+
+    ; VOLVER A POSICIÓN PREVIA
+    move %tempPosX %tempPosY 0
+
+return
+
+
+; ============================================================
+; DEJAR ITEMS EN DESTINO
+; ============================================================
+
+sub dejando
+
+    ; %1 = item
+    ; %2 = contenedor origen
+    ; %3 = acción finditem (C_, G_, etc)
+    ; %4..%6 = acción destino
+
+    set %countDejando 0
+
+    repeat
+
+        finditem %1 %2 , %3
+
+        if #FINDID = X
+            return
+
+        exevent drag #FINDID #FINDSTACK
+        wait 15
+
+        exevent %4 %5 %6
+        wait 15
+
+        set %countDejando %countDejando + 1
+
+    until #FINDID = X || %countDejando > 10
+
+return
+
+
+; ============================================================
+; DEBUG
+; ============================================================
+
+sub pauseDebug
+
+    if *DEBUGMODE = 1
+        pause
+
+return
+
+
+; ============================================================
+; CALL SCRIPT UTILITY
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

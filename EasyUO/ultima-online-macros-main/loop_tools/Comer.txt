@@ -1,0 +1,71 @@
+;============================================================
+;SCRIPT: COMER
+;============================================================
+;
+; Script de consumo automático de comida.
+; Combinar este script con otros scripts de farmeo
+;
+; RESPONSABILIDAD:
+;  - Buscar comida en la mochila
+;  - Consumir el item si está disponible
+;  - Repetir el proceso cada intervalo configurado
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO gestiona estados de hambre
+;   - NO mueve al personaje
+;   - NO interactúa con sistemas externos
+;
+;  Solo automatiza el uso de comida disponible.
+;
+;============================================================
+
+set %WAIT_TIME 360s
+
+; TIPOS DE COMIDA SOPORTADOS
+set %foodItemType RGG_NRD_QSD_ZBG_WLI_QRD_END_FUD_YLI_WLI_HGI
+     +_KGI_EGI_QLI_KLI_MLI_KRD_HQD_AQD_MQE_VQE_TQE_JQE_IQE
+     +_GQE_SPE_ZPE_OQE_BDF_KPE_RQE_YSD_SQD_YWI_AXI_PQD_QQD
+
+set %foodContainer #BACKPACKID
+
+loop:
+repeat
+{
+    for %i 0 2
+    {
+        gosub findFood
+
+        if %foodId <> -1
+        {
+            set %last_variable_object #LOBJECTID
+
+            set #LOBJECTID %foodId
+            event macro 17 0
+
+            wait 5
+
+            set #LOBJECTID %last_variable_object
+        }
+    }
+
+    wait %WAIT_TIME
+}
+until 0
+
+
+sub findFood
+
+    set %foodId -1
+
+    finditem %foodItemType C_ , %foodContainer
+
+    if #FINDKIND <> -1
+    {
+        set %foodId #FINDID
+        return
+    }
+
+    Event SysMessage [COMER] Comida no encontrada
+
+return

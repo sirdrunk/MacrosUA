@@ -1,0 +1,174 @@
+;============================================================
+;CONFIG EXPORT FARMZONE
+;============================================================
+;
+; Exportador de configuración de farmzones a fichero externo.
+;
+; RESPONSABILIDAD:
+;  - Leer configuración actual de farmzones
+;  - Generar líneas de configuración en formato script
+;  - Escribir el resultado en archivo mediante Printer_Files
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO modifica la configuración del juego
+;   - NO ejecuta lógica de farmeo
+;   - SOLO exporta datos a fichero
+;
+;============================================================
+
+set %FARMZONE_ALIAS *param1
+
+set %EXPORT_FILE 0_config\farmzone\ , CONFIG_FARMZONE_ , %FARMZONE_ALIAS , #dot , txt
+
+set %SCRIPT_PRINTER_FILES *SCRIPT_DIR , aux_tools\ , Printer_Files.txt
+
+set %APPEND_FALSE #false
+set %APPEND_TRUE #true
+
+set %SET se , t
+set %ASTERISCO *
+
+event ExMsg #charID 3 0 Exportando configuracion en %EXPORT_FILE
+
+gosub ExportFarmZones
+
+exit
+
+stop
+
+
+;============================================================
+; EXPORT DE FARMZONES
+;============================================================
+;
+; Genera el fichero de configuración completo de farmzones.
+;
+;============================================================
+
+sub ExportFarmZones
+
+    ; =========================
+    ; CABECERA GLOBAL
+    ; =========================
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_FARM_ZONE_COUNT , #spc , *CFG_FARM_ZONE_COUNT
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_FALSE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_CIRCULAR , #spc , *CFG_FARMZONE_CIRCULAR
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+    set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_WRAP_FROM , #spc , *CFG_FARMZONE_WRAP_FROM
+    gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+
+    ; =========================
+    ; DEFINICIÓN DE FARMZONES
+    ; =========================
+
+    for %indexFarmZone 0 *CFG_FARM_ZONE_COUNT
+    {
+        ; DEFINICION BASE
+        set %def *CFG_FARMZONE_DEFINITION . %indexFarmZone
+
+        set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_DEFINITION , %indexFarmZone , #spc , %def
+        gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+
+        ; =========================
+        ; FARMZONE POR ESQUINAS
+        ; =========================
+
+        if %def = CORNERS
+        {
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_TOP_LEFT_X , %indexFarmZone , #spc , *CFG_FARMZONE_TOP_LEFT_X . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_TOP_LEFT_Y , %indexFarmZone , #spc , *CFG_FARMZONE_TOP_LEFT_Y . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_BOT_RIGHT_X , %indexFarmZone , #spc , *CFG_FARMZONE_BOT_RIGHT_X . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_BOT_RIGHT_Y , %indexFarmZone , #spc , *CFG_FARMZONE_BOT_RIGHT_Y . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+        }
+
+
+        ; =========================
+        ; FARMZONE POR CENTRO
+        ; =========================
+
+        if %def = CENTER
+        {
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_CENTER_X , %indexFarmZone , #spc , *CFG_FARMZONE_CENTER_X . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_CENTER_Y , %indexFarmZone , #spc , *CFG_FARMZONE_CENTER_Y . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_SIZE_X , %indexFarmZone , #spc , *CFG_FARMZONE_SIZE_X . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+            set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_SIZE_Y , %indexFarmZone , #spc , *CFG_FARMZONE_SIZE_Y . %indexFarmZone
+            gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+        }
+
+
+        ; =========================
+        ; TAMAÑO DE ZONA
+        ; =========================
+
+        set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_ZONE_SIZE_X , %indexFarmZone , #spc , *CFG_FARMZONE_ZONE_SIZE_X . %indexFarmZone
+        gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+
+        set %linea %SET , #spc , %ASTERISCO , CFG_FARMZONE_ZONE_SIZE_Y , %indexFarmZone , #spc , *CFG_FARMZONE_ZONE_SIZE_Y . %indexFarmZone
+        gosub callScriptWithParams %SCRIPT_PRINTER_FILES %linea %EXPORT_FILE %APPEND_TRUE
+    }
+
+    Event SysMessage [EXPORT] Farmzones exportadas correctamente
+
+return
+
+
+;============================================================
+;CALL GENERICO CON PARAMETROS
+;============================================================
+;
+; Permite ejecutar scripts externos pasando parámetros.
+;
+; COMPORTAMIENTO:
+;  - El script recibe parámetros en *param0, *param1...
+;  - %1 siempre es el script y no se incluye en la lista final
+;
+;============================================================
+
+sub callScriptWithParams
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+
+return

@@ -1,0 +1,103 @@
+Event SysMessage [CONFIG] Inicializando configuracion de TALA
+
+; =========================
+; INSTRUCCIONES
+; =========================
+
+
+; Configurar previamente la farmzone con el CONFIG_GENERATOR_FARMZONE
+; Configurar previamente la casa con el CONFIG_GENERATOR_HOME
+; Una farmzone es una extension cuadrada donde el personaje escaneara cada tile en busca de arboles. Talará todos los arboles en su interior.
+; *IMPORTANTE, debe poderse andar sin grandes obstaculos entre los centros de farmzones adyacentes para que no se quede bloqueado el personaje.
+; Situarse cerca de la primera farmzone
+; La primera farmzone debe estar cerca de la casa.
+
+; =========================
+; INICIO
+; =========================
+set *CFG_INITIAL_FARMZONE 0
+
+; =========================
+; FICHEROS
+; =========================
+set *CFG_SCRIPT_ORQUESTADOR Orquestador.txt
+set *CFG_SCRIPT_INICIALIZADOR Inicializador_TileZones.txt
+set *CFG_SCRIPT_PREPARADOR Preparador_TileFarmer.txt
+set *CFG_SCRIPT_EJECUTOR Ejecutor_Skill_On_Tile.txt
+
+; =========================
+; MOVIMIENTO
+; =========================
+set *CFG_IR_CASA 1
+set *CFG_TILE_Z 3
+
+set %SCRIPT_FARMZONE *SCRIPT_DIR , 0_config\farmzone\ , CONFIG_FARMZONE_Lumberjaking_CasaDami.txt ;***********	Farmone a utilizar
+call %SCRIPT_FARMZONE
+
+set %SCRIPT_CASA *SCRIPT_DIR , 0_config\home\ , CONFIG_HOME_CasaDami.txt ;***********	Casa a utilizar
+call %SCRIPT_CASA
+
+; =========================
+; TILES OK y BAD
+; =========================
+set *CFG_TILE_USE_Z 0
+set *CFG_TILES_OK0 TREE
+set *CFG_TILES_OK1 LEAVES
+set *CFG_TILES_OK2 NEEDLES
+set *CFG_TILES_OK_COUNT 2
+
+set *CFG_TILES_BAD0 O'HII
+set *CFG_TILES_BAD1 YEW
+set *CFG_TILES_BAD_COUNT 1
+; =========================
+; SKILL
+; =========================
+set *CFG_SKILL_NAME LUMBERJACKING
+set *CFG_SKILL_USE Lumberjacking
+set *CFG_SKILL_REQUIRES_OBJECT 1
+set *CFG_SKILL_OBJECT_TYPE FSF      ; se llenará automáticamente
+set *CFG_SKILL_MAX_USOS 5
+set *CFG_SKILL_OBJECT_EQUIPABLE 1
+
+; =========================
+; JOURNAL OK
+; =========================
+set *CFG_OK0 PONES_EL_TRONCO
+set *CFG_OK1 A_TUS_PIES
+set *CFG_OK2 YOUR_SKILL_IN
+set *CFG_OK3 PERO_NO_OBTIENES_MADERA_UTIL
+set *CFG_OK_COUNT 3
+
+; =========================
+; JOURNAL FAIL
+; =========================
+set *CFG_FAIL0 AQUI_NO_HAY_NADA
+set *CFG_FAIL1 NO_LO_ALCANZAS
+set *CFG_FAIL2 PARECE_QUE_ES_INMUNE
+set *CFG_FAIL3 YOU_CANNOT_CHOP_SO
+set *CFG_FAIL4 ESO_ESTA_MUY_LEJOS
+set *CFG_FAIL5 SEE_THE_TARGET
+set *CFG_FAIL_COUNT 5
+
+; =========================
+; TIEMPOS
+; =========================
+set *CFG_TIME_ACCION 2s
+set *CFG_TIMEOUT_ACCION 120000
+
+; =========================
+; ITEMS Y PESO
+; =========================
+set *CFG_ITEM_RECOGIDA0 ZLK
+set *CFG_ITEM_RECOGIDA1 RVF
+set *CFG_ITEM_RECOGIDA_COUNT 1
+set *CFG_PESO_MAX #MAXWEIGHT - 80
+
+
+; =========================
+; LOG
+; =========================
+set *CFG_LOG_LEVEL 3
+
+Event SysMessage [CONFIG] TALA lista
+exit

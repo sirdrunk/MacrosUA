@@ -1,0 +1,272 @@
+; ################################################################
+; # PREPARADOR - CRAFTEO
+; ################################################################
+;
+; Flujo de preparación para crafteo:
+; - obtención de objeto de skill
+; - gestión de recursos
+; - ejecución de skill
+; - depósito de resultados
+;
+
+
+; ============================================================
+; FLUJO PRINCIPAL
+; ============================================================
+
+Preparador:
+
+    gosub BuscarObjetoSkill
+    gosub AsegurarRecursos
+    gosub UsarObjeto
+    gosub DejarItems
+
+    wait 1s
+
+exit
+
+
+; ============================================================
+; OBJETO DE SKILL
+; ============================================================
+
+sub BuscarObjetoSkill
+
+    if *CFG_SKILL_REQUIRES_OBJECT <> 1
+        return
+
+
+    ; equipado si aplica
+    if *CFG_SKILL_EQUIP_OBJECT = 1
+    {
+        finditem *CFG_SKILL_OBJECT_TYPE C_ , #CHARID
+
+        if #FINDKIND <> -1
+        {
+            set *skillObjectID #FINDID
+            return
+        }
+    }
+
+
+    ; mochila
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #BACKPACKID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [PREPARADOR] objeto en mochila
+        set *skillObjectID #FINDID
+
+        if *CFG_SKILL_EQUIP_OBJECT = 1
+        {
+            set #LOBJECTID *skillObjectID
+            event macro 17 0
+            wait 7
+            Event SysMessage [PREPARADOR] objeto equipado
+        }
+
+        return
+    }
+
+
+    ; contenedor externo
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , *CFG_SKILL_OBJECT_CONTAINER
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [PREPARADOR] objeto en contenedor
+        set *skillObjectID #FINDID
+
+        exevent drag *skillObjectID 1
+        wait 7
+        exevent dropc #BACKPACKID
+        wait 7
+
+        if *CFG_SKILL_EQUIP_OBJECT = 1
+        {
+            set #LOBJECTID *skillObjectID
+            event macro 17 0
+            wait 7
+            Event SysMessage [PREPARADOR] objeto equipado
+        }
+
+        return
+    }
+
+return
+
+
+; ============================================================
+; RECURSOS
+; ============================================================
+
+sub AsegurarRecursos
+
+    set %resource_index 0
+
+    while %resource_index <= *CFG_RESOURCE_COUNT
+    {
+        gosub AsegurarRecurso %resource_index
+        set %resource_index %resource_index + 1
+    }
+
+return
+
+
+sub AsegurarRecurso
+
+    set %type *CFG_RESOURCE_TYPE . %1
+    set %cantidadObjetivo *CFG_RESOURCE_QUANTITY . %1
+    set %contenedor *CFG_RESOURCE_CONTAINER . %1
+
+    set %cantidadActual 0
+
+    finditem %type C_ , #BACKPACKID
+
+    if #FINDCNT > 0
+        set %cantidadActual #FINDSTACK
+
+    if %cantidadActual >= %cantidadObjetivo
+    {
+        Event SysMessage [PREP] recurso OK
+        return
+    }
+
+    set %faltan %cantidadObjetivo - %cantidadActual
+
+    finditem %type C_ , %contenedor
+
+    if #FINDCNT = 0
+    {
+        Event SysMessage [PREP] recurso no disponible
+        return
+    }
+
+    Event SysMessage [PREP] recurso encontrado
+
+    if #FINDSTACK < %faltan
+        set %faltan #FINDSTACK
+
+    exevent drag #FINDID %faltan
+    wait 10
+    exevent dropc #BACKPACKID
+    wait 10
+
+return
+
+
+; ============================================================
+; USO DE OBJETO
+; ============================================================
+
+sub UsarObjeto
+
+    if *CFG_SKILL_OBJECT_USEOBJECT = 1
+    {
+        finditem *CFG_SKILL_OBJECT_TARGET C_ , #BACKPACKID
+
+        if #FINDCNT > 0
+        {
+            set #LTARGETID #FINDID
+            set #LTARGETKIND 1
+        }
+
+        set #LOBJECTID *skillObjectID
+
+        event macro 17 0
+        target 5s
+        event macro 22
+    }
+
+return
+
+
+; ============================================================
+; DEPOSITAR ITEMS
+; ============================================================
+
+sub DejarItems
+
+    set %crafted_index 0
+
+    while %crafted_index <= *CFG_CRAFTED_COUNT
+    {
+        gosub DejarItem %crafted_index
+        set %crafted_index %crafted_index + 1
+    }
+
+return
+
+
+sub DejarItem
+
+    set %type *CFG_CRAFTED_TYPE . %1
+    set %contenedor *CFG_CRAFTED_CONTAINER . %1
+
+    finditem %type C_ , #BACKPACKID
+
+    if #FINDCNT > 0
+    {
+        if *CFG_CRAFTED_STACK . %1 = 1
+        {
+            exevent drag #FINDID #FINDSTACK
+            wait 7
+            exevent dropc %contenedor
+            wait 7
+            Event SysMessage [PREP] item depositado
+        }
+        else
+        {
+            while #FINDCNT > 0
+            {
+                exevent drag #FINDID #FINDSTACK
+                wait 7
+                exevent dropc %contenedor
+                wait 7
+
+                finditem %type C_ , #BACKPACKID
+            }
+        }
+    }
+
+return
+
+
+; ============================================================
+; UTILIDAD: MOVE UNTIL AMOUNT
+; ============================================================
+
+sub MoveUntilAmount
+
+    set %currentAmount 0
+
+    finditem %1 %3
+    set %currentAmount #FINDSTACK
+
+    if %currentAmount >= %4
+        return
+
+    while %currentAmount < %4
+    {
+        finditem %1 %2
+
+        if #FINDCNT = 0
+            return
+
+        set %needed %4 - %currentAmount
+
+        if #FINDSTACK > %needed
+            set %moveAmount %needed
+        else
+            set %moveAmount #FINDSTACK
+
+        exevent drag #FINDID %moveAmount
+        wait 7
+        exevent dropc %3
+        wait 7
+
+        finditem %1 %3
+        set %currentAmount #FINDSTACK
+    }
+
+return

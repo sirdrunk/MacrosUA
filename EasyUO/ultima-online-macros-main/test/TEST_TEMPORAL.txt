@@ -1,0 +1,85 @@
+;============================================================
+;TEST TEMPORAL
+;============================================================
+;
+; Script de entorno de pruebas.
+;
+; RESPONSABILIDAD:
+;  - Servir como contenedor de pruebas de scripts
+;  - Permitir ejecutar fragmentos de lógica de forma aislada
+;  - Facilitar debugging manual de funciones
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO es funcional por sí mismo
+;   - NO representa lógica final del sistema
+;   - NO debe usarse en producción
+;
+;  EN ESTE ARCHIVO SE DEBE COPIAR Y PEGAR EL CÓDIGO A TESTEAR
+;  (cualquier rutina, sub o bloque que se quiera ejecutar)
+;
+;============================================================
+
+Preparador:
+    gosub findAnimal
+exit
+
+
+;============================================================
+; ZONA DE TEST
+;============================================================
+;
+; 👉 COPIAR AQUÍ EL CÓDIGO A PROBAR
+; 👉 MODIFICAR LIBREMENTE PARA DEBUG
+; 👉 ESTE BLOQUE ES VOLÁTIL
+;
+;============================================================
+
+
+
+sub findAnimal
+
+    Event SysMessage [TEST_TEMPORAL] encontrando animal
+
+    set %distance 2
+
+    findItem * G_ , %distance
+
+    if #findkind > -1
+    {
+        Event SysMessage [TEST_TEMPORAL] encontrado!!! #FINDTYPE
+    }
+    else
+    {
+        Event SysMessage [TEST_TEMPORAL] nada, a seguir buscando
+    }
+
+return
+
+
+sub domarAnimal
+
+    Event SysMessage [TEST_TEMPORAL] domando animal
+
+    set #LTARGETID TQJQJB
+
+    event macro 13 35
+    target 3s
+    event macro 22
+
+return
+
+
+;============================================================
+; NOTAS DE REFERENCIA
+;============================================================
+;
+; ID de ejemplo:
+;   TQJQJB
+;
+; Tipos de prueba:
+;   WG = Rata
+;   PF = Oveja
+;   APNPIND = entidad de test
+;
+;============================================================

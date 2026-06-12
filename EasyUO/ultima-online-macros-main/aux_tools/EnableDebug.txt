@@ -1,0 +1,35 @@
+;============================================================
+;ENABLE DEBUG
+;============================================================
+;
+; Activa o desactiva el modo debug global del sistema.
+;
+; RESPONSABILIDAD:
+;  - Alternar el valor de *DEBUGMODE
+;  - Mostrar estado actual por pantalla
+;  - Pausar ejecución para inspección manual
+;
+; IMPORTANTE:
+;  *DEBUGMODE controla:
+;   - mensajes de diagnóstico
+;   - pausas manuales
+;   - trazas internas de scripts
+;
+; VALORES:
+;  1 = Debug activado
+;  0 = Debug desactivado
+;
+;============================================================
+
+if *DEBUGMODE <> 1
+{
+    Event SysMessage DEBUGMODE activado
+    set *DEBUGMODE 1
+}
+else
+{
+    Event SysMessage DEBUGMODE desactivado
+    set *DEBUGMODE 0
+}
+
+pause

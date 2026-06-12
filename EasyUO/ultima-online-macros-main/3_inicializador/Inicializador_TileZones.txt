@@ -1,0 +1,154 @@
+; ################################################################
+; # INICIALIZADOR - TILE ZONES + SKILL SETUP
+; ################################################################
+;
+; Inicializa el sistema antes del loop principal:
+; - cálculo de zonas
+; - selección de zona inicial
+; - detección/equipamiento de objeto de skill
+;
+
+
+; ============================================================
+; CONFIGURACIÓN (READ ONLY)
+; ============================================================
+
+; 999 = fuerza selección automática de la primera zona válida
+
+; zonas
+; *CFG_ZONE_TOP_LEFT_X
+; *CFG_ZONE_TOP_LEFT_Y
+; *CFG_ZONE_BOT_RIGHT_X
+; *CFG_ZONE_BOT_RIGHT_Y
+; *CFG_ZONE_SIZE
+
+; skill
+; *CFG_SKILL_REQUIRES_OBJECT
+; *CFG_SKILL_OBJECT_TYPE
+; *CFG_SKILL_OBJECT_EQUIPABLE
+
+
+; ============================================================
+; VARIABLES RUNTIME
+; ============================================================
+
+; zonas
+; *zoneCountX
+; *zoneCountY
+; *zoneLastIndexX
+; *zoneLastIndexY
+; *STARTZONEX
+; *STARTZONEY
+
+; skill
+; *skillObjectID
+
+
+; ============================================================
+; INICIO INICIALIZADOR
+; ============================================================
+
+set %SCRIPT_ZONE_SHIFTER *SCRIPT_DIR , aux_tools\ , ZoneShifter.txt
+
+Event SysMessage [INICIADOR] Inicio
+
+gosub callScriptWithParams %SCRIPT_ZONE_SHIFTER
+
+gosub BuscarObjetoSkill
+
+exit
+
+
+; ============================================================
+; SKILL OBJECT SETUP
+; ============================================================
+
+sub BuscarObjetoSkill
+
+    ; skill no requiere objeto
+    if *CFG_SKILL_REQUIRES_OBJECT <> 1
+        return
+
+
+    ; equipado
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #CHARID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [INICIADOR] objeto equipado
+        set *skillObjectID #FINDID
+        return
+    }
+
+
+    ; mochila
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #BACKPACKID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [INICIADOR] objeto en mochila
+        set *skillObjectID #FINDID
+
+        if *CFG_SKILL_OBJECT_EQUIPABLE = 1
+        {
+            set #LOBJECTID *skillObjectID
+            event macro 17 0
+            wait 7
+            Event SysMessage [INICIADOR] objeto equipado
+        }
+
+        return
+    }
+
+
+    ; manual user input
+    Event SysMessage [INICIADOR] seleccionar objeto manual
+
+    set #LOBJECTID YC
+
+    repeat
+        wait 5
+    until #LOBJECTID <> YC
+
+    set *CFG_SKILL_OBJECT_TYPE #LOBJECTTYPE
+    set *skillObjectID #LOBJECTID
+
+    Event SysMessage [INICIADOR] objeto registrado
+
+return
+
+
+; ============================================================
+; UTILITY: CALL SCRIPT WITH PARAMS
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

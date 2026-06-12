@@ -1,0 +1,81 @@
+;============================================================
+;TEST LAUNCHER
+;============================================================
+;
+; Script de prueba para ejecución de otros scripts.
+;
+; RESPONSABILIDAD:
+;  - Construir ruta del script objetivo
+;  - Definir parámetros de test
+;  - Lanzar scripts mediante callScriptWithParams
+;
+; IMPORTANTE:
+;  Este script:
+;   - NO ejecuta lógica de gameplay real
+;   - NO forma parte del sistema productivo
+;   - SOLO sirve para pruebas y debugging
+;
+;============================================================
+
+initEvents
+
+set %SCRIPT_DIR D:\Damian\Chorradillas\UltimaOnline\ultima-online-macros\test\
+set %SCRIPT_NAME %SCRIPT_DIR , TEST_TEMPORAL.txt
+
+set %SCRIPT %SCRIPT_NAME
+set *DEBUGMODE 0
+
+set %alias alias_prueba
+Event SysMessage [TEST_LAUNCHER] alias #spc %alias
+
+set %parametro1 592
+set %parametro2 930
+set %parametro3 2
+set %parametro4 5s
+
+gosub callScriptWithParams %SCRIPT %parametro1 %parametro2 %parametro3 %parametro4
+
+pause
+
+
+;============================================================
+;CALL GENERICO CON PARAMETROS
+;============================================================
+;
+; Permite ejecutar scripts externos pasando parámetros.
+;
+; COMPORTAMIENTO:
+;  - El script recibe parámetros en *param0, *param1...
+;  - %1 siempre es el script y no se incluye en la lista final
+;
+;============================================================
+
+sub callScriptWithParams
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+
+return

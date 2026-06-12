@@ -1,0 +1,308 @@
+; ============================================================
+; PREPARADOR TILE FARMER
+; ============================================================
+;
+; Selección de tiles para ejecución de skill.
+; Itera zonas + tiles hasta encontrar objetivo válido.
+;
+; No ejecuta skills.
+; No toma decisiones de lógica de negocio.
+; Solo selecciona target y posiciona jugador.
+;
+; ============================================================
+
+
+set %SCRIPT_ZONE_SHIFTER *SCRIPT_DIR , aux_tools\ , ZoneShifter.txt
+
+gosub pauseDebug
+tile init
+gosub PrepararAccion
+exit
+
+
+; ============================================================
+; FLUJO PRINCIPAL
+; ============================================================
+
+sub PrepararAccion
+
+    gosub ScanZona
+
+    if *tileFoundX <> -1
+    {
+        gosub FijarTargetTile
+        return
+    }
+
+    gosub callScriptWithParams %SCRIPT_ZONE_SHIFTER
+
+    set *zoneLastIndexX 0
+    set *zoneLastIndexY 0
+
+    if *zoneStartX = -1
+    {
+        set *tileFoundX -1
+        return
+    }
+
+    gosub ScanZona
+
+    if *tileFoundX <> -1
+    {
+        gosub FijarTargetTile
+        return
+    }
+
+    set *tileFoundX -1
+return
+
+
+; ============================================================
+; SCAN DE ZONA
+; ============================================================
+
+sub ScanZona
+
+    set *tileFoundX -1
+    set *tileFoundY -1
+    set *tileFoundZ -1
+    set *tileFoundType N/A
+
+    gosub CalcularZona *zoneStartX *zoneStartY
+
+    if *zoneLastIndexX = -1
+        return
+
+    for %y *zoneLastIndexY %maxIndexZoneY
+    {
+
+        if %y = *zoneLastIndexY
+            set %startX *zoneLastIndexX
+        else
+            set %startX 0
+
+        for %x %startX %maxIndexZoneX
+        {
+
+            set %worldX %zoneStartCoordX + %x
+            set %worldY %zoneStartCoordY + %y
+
+            tile get %worldX %worldY *CFG_TILE_Z
+
+            gosub isValidTile
+
+            if %validTile = 1
+            {
+
+                set *tileFoundX %worldX
+                set *tileFoundY %worldY
+                set *tileFoundZ *CFG_TILE_USE_Z
+                set *tileFoundType #TILETYPE
+
+                set *zoneLastIndexX %x + 1
+                set *zoneLastIndexY %y
+
+                if *zoneLastIndexX > %maxIndexZoneX
+                {
+                    set *zoneLastIndexX 0
+                    set *zoneLastIndexY *zoneLastIndexY + 1
+
+                    if *zoneLastIndexY > %maxIndexZoneY
+                    {
+                        set *zoneLastIndexX -1
+                        set *zoneLastIndexY -1
+                    }
+                }
+
+                return
+            }
+        }
+    }
+
+    set *zoneLastIndexX -1
+    set *zoneLastIndexY -1
+return
+
+
+; ============================================================
+; VALIDACIÓN TILE
+; ============================================================
+
+sub isValidTile
+
+    set %validTile 0
+
+    for %i 0 *CFG_TILES_OK_COUNT
+    {
+        if *CFG_TILES_OK . %i in #TILENAME
+        {
+            set %validTile 1
+            break
+        }
+    }
+
+    if %validTile = 1
+    {
+        for %j 0 *CFG_TILES_BAD_COUNT
+        {
+            if *CFG_TILES_BAD . %j in #TILENAME
+            {
+                set %validTile 0
+                break
+            }
+        }
+    }
+
+return
+
+
+; ============================================================
+; CALCULO ZONA
+; ============================================================
+
+sub CalcularZona
+
+    set %zoneStartCoordX *farmZoneTopLeftX + ( %1 * *farmZoneZoneSizeX )
+    set %zoneStartCoordY *farmZoneTopLeftY + ( %2 * *farmZoneZoneSizeY )
+
+    set %zoneEndCoordX %zoneStartCoordX + *farmZoneZoneSizeX - 1
+    set %zoneEndCoordY %zoneStartCoordY + *farmZoneZoneSizeY - 1
+
+    if %zoneEndCoordX > *farmZoneBotRightX
+        set %zoneEndCoordX *farmZoneBotRightX
+
+    if %zoneEndCoordY > *farmZoneBotRightY
+        set %zoneEndCoordY *farmZoneBotRightY
+
+    set %zoneCenterCoordX %zoneStartCoordX + ( ( %zoneEndCoordX - %zoneStartCoordX ) / 2 )
+    set %zoneCenterCoordY %zoneStartCoordY + ( ( %zoneEndCoordY - %zoneStartCoordY ) / 2 )
+
+    set %minIndexZoneX 0
+    set %minIndexZoneY 0
+    set %maxIndexZoneX %zoneEndCoordX - %zoneStartCoordX
+    set %maxIndexZoneY %zoneEndCoordY - %zoneStartCoordY
+
+return
+
+
+; ============================================================
+; TARGET FINAL
+; ============================================================
+
+sub FijarTargetTile
+
+    if *tileFoundX = -1
+        return
+
+    set #LTARGETX *tileFoundX
+    set #LTARGETY *tileFoundY
+    set #LTARGETZ *tileFoundZ
+    set #LTARGETTILE *tileFoundType
+    set #LTARGETKIND 3
+
+    move *tileFoundX *tileFoundY 1 20s
+
+    gosub MoverAUnTileAdyacente
+
+return
+
+
+; ============================================================
+; MOVIMIENTO
+; ============================================================
+
+sub EstoyEnTileAdyacente
+
+    set %isAdjacent 0
+
+    set %dx #CHARPOSX - *tileFoundX
+    if %dx < 0
+        set %dx %dx * -1
+
+    set %dy #CHARPOSY - *tileFoundY
+    if %dy < 0
+        set %dy %dy * -1
+
+    if %dx <= 1 && %dy <= 1
+    {
+        if %dx <> 0 || %dy <> 0
+            set %isAdjacent 1
+    }
+
+return
+
+
+sub MoverAUnTileAdyacente
+
+    gosub EstoyEnTileAdyacente
+    if %isAdjacent = 1
+        return
+
+    for %dx -1 1
+    {
+        for %dy -1 1
+        {
+            if %dx = 0 && %dy = 0
+                continue
+
+            set %tx *tileFoundX + %dx
+            set %ty *tileFoundY + %dy
+
+            GetTile %tx %ty #CHARPOSZ %tileID %tileZ %tileFlags
+
+            if %tileFlags & #TILEFLAG_WALKABLE
+            {
+                move %tx %ty 1 20s
+                return
+            }
+        }
+    }
+
+return
+
+
+; ============================================================
+; DEBUG
+; ============================================================
+
+sub pauseDebug
+
+    if *DEBUGMODE = 1
+        pause
+
+return
+
+; ============================================================
+; CALL SCRIPT UTILITY
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return

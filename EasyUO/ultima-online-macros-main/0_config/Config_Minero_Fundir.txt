@@ -1,0 +1,123 @@
+Event SysMessage [CONFIG] Inicializando configuracion de MINA_FUNDIR
+
+; =========================
+; INSTRUCCIONES
+; =========================
+
+
+; Configurar previamente la casa con el CONFIG_GENERATOR_HOME
+; Se debe poder andar entre el cofre de casa y la forja
+; La primera farmzone debe estar cerca de la casa.
+
+
+; =========================
+; FICHEROS
+; =========================
+set *CFG_SCRIPT_ORQUESTADOR Orquestador.txt
+set *CFG_SCRIPT_INICIALIZADOR Inicializador_Vacio.txt
+set *CFG_SCRIPT_PREPARADOR Preparador_Minero_Fundir.txt
+set *CFG_SCRIPT_EJECUTOR Ejecutor_Minero_Fundir.txt
+
+; =========================
+; MOVIMIENTO
+; =========================
+set *CFG_IR_CASA 1
+set *CFG_TILE_Z 1
+set *CFG_TILE_USE_Z 0 - 90
+
+set %SCRIPT_CASA *SCRIPT_DIR , 0_config\home\ , CONFIG_HOME_Mina.txt  ;***********	Casa a utilizar
+call %SCRIPT_CASA
+
+; =========================
+; TRABAJO
+; =========================
+set *CFG_TRABAJO_X 1171 
+set *CFG_TRABAJO_Y 484 
+; =========================
+; TILES OK y BAD
+; =========================
+set *CFG_TILES_OK0 ROCK
+set *CFG_TILES_OK_COUNT 0
+
+set *CFG_TILES_BAD0 PATATA
+set *CFG_TILES_BAD_COUNT 0
+; =========================
+; SKILL
+; =========================
+set *CFG_SKILL_NAME MINERO
+set *CFG_SKILL_USE Mineria
+set *CFG_SKILL_REQUIRES_OBJECT 1
+set *CFG_SKILL_OBJECT_TYPE NPF      ; se llenará automáticamente
+set *CFG_SKILL_MAX_USOS 5
+set *CFG_SKILL_OBJECT_EQUIPABLE 1
+
+; =========================
+; JOURNAL OK
+; =========================
+set *CFG_OK0 PONES_EL_MINERAL
+set *CFG_OK1 A_TUS_PIES
+set *CFG_OK2 YOUR_SKILL_IN
+set *CFG_OK_COUNT 2
+
+; =========================
+; JOURNAL FAIL
+; =========================
+set *CFG_FAIL0 AQUI_NO_HAY_NADA
+set *CFG_FAIL1 NO_LO_ALCANZAS
+set *CFG_FAIL2 PARECE_QUE_ES_INMUNE
+set *CFG_FAIL3 YOU_CANNOT_CHOP_SO
+set *CFG_FAIL4 ESO_ESTA_MUY_LEJOS
+set *CFG_FAIL5 NO_PUEDES_VER
+set *CFG_FAIL_COUNT 5
+
+; =========================
+; TIEMPOS
+; =========================
+set *CFG_TIME_ACCION 2s
+set *CFG_TIMEOUT_ACCION 120000
+
+; =========================
+; RESOURCES
+; =========================
+set *CFG_RESOURCE_TYPE0 DWJ_TVJ_GWJ
+set *CFG_RESOURCE_QUANTITY0 50
+set *CFG_RESOURCE_CONTAINER0 PQNJFQD   ;***********	Casa a utilizarCaja de minerales del banco
+set *CFG_RESOURCE_CONTAINER_TO0 YHLHFQD   ;***********	Casa a utilizarCaja de minerales mochila
+set *CFG_RESOURCE_COUNT 0
+; =========================
+
+; =========================
+; CRAFTED_ITEMS
+; =========================
+set *CFG_CRAFTED_TYPE0 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER0 WHLHFQD
+set *CFG_CRAFTED_ITEM_SELL_KEY0
+set *CFG_CRAFTED_TYPE1 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER1 WHLHFQD
+set *CFG_CRAFTED_TYPE2 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER2 WHLHFQD
+set *CFG_CRAFTED_TYPE3 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER3 WHLHFQD
+set *CFG_CRAFTED_TYPE4 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER4 WHLHFQD
+set *CFG_CRAFTED_TYPE5 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER5 WHLHFQD
+set *CFG_CRAFTED_TYPE6 RMK_TMK_XMK_NMK
+set *CFG_CRAFTED_CONTAINER6 WHLHFQD
+set *CFG_CRAFTED_COUNT 0
+
+
+; ITEMS Y PESO
+; =========================
+set *CFG_ITEM_RECOGIDA0 RMK ;Lingotes oxidados
+set *CFG_ITEM_RECOGIDA_COUNT 0
+set *CFG_PESO_MAX #MAXWEIGHT - 80
+
+
+; =========================
+; LOG
+; =========================
+set *CFG_LOG_LEVEL 3
+
+Event SysMessage [CONFIG] MINA_FUNDIR lista
+exit

@@ -1,0 +1,34 @@
+;============================================================
+;SCANNER
+;============================================================
+;
+; Script para rastrear cosas cercanas.
+;
+; RESPONSABILIDAD:
+;  - Rastrea objetos cercanos para sacar sus propiedades como ID, TIPO...
+;
+; IMPORTANTE:
+;  Este script:
+;   - Es funcional por sí mismo
+;
+;
+;============================================================
+
+sub findAnimal
+
+    Event SysMessage [TEST_TEMPORAL] encontrando animal
+
+    set %distance 2
+
+    findItem * G_ , %distance
+
+    if #findkind > -1
+    {
+        Event SysMessage [TEST_TEMPORAL] encontrado!!! #FINDTYPE
+    }
+    else
+    {
+        Event SysMessage [TEST_TEMPORAL] nada, a seguir buscando
+    }
+
+return

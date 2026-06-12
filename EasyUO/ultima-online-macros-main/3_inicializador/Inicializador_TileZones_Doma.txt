@@ -1,0 +1,165 @@
+; ################################################################
+; # INICIALIZADOR - TILEZONES DOMA
+; ################################################################
+;
+; Inicializa:
+; - zonas de trabajo
+; - objeto de skill
+; - lista de ignores de animales
+;
+
+
+; ============================================================
+; CONFIG ZONES (READ ONLY)
+; ============================================================
+
+; 999 = auto primera zona válida
+
+; zona total
+; *CFG_ZONE_TOP_LEFT_X
+; *CFG_ZONE_TOP_LEFT_Y
+; *CFG_ZONE_BOT_RIGHT_X
+; *CFG_ZONE_BOT_RIGHT_Y
+; *CFG_ZONE_SIZE
+
+; skill
+; *CFG_SKILL_REQUIRES_OBJECT
+; *CFG_SKILL_OBJECT_TYPE
+; *CFG_SKILL_OBJECT_EQUIPABLE
+
+
+; ============================================================
+; RUNTIME VARIABLES
+; ============================================================
+
+; zonas
+; *zoneCountX
+; *zoneCountY
+; *zoneLastIndexX
+; *zoneLastIndexY
+; *STARTZONEX
+; *STARTZONEY
+
+; skill
+; *skillObjectID
+
+
+; ============================================================
+; INICIO
+; ============================================================
+
+set %SCRIPT_ZONE_SHIFTER *SCRIPT_DIR , aux_tools\ , ZoneShifter.txt
+
+Event SysMessage [INICIADOR] Inicio
+
+; gosub callScriptWithParams %SCRIPT_ZONE_SHIFTER
+
+gosub BuscarObjetoSkill
+gosub InitAnimalsIgnoreList
+
+exit
+
+
+; ============================================================
+; SKILL OBJECT SETUP
+; ============================================================
+
+sub BuscarObjetoSkill
+
+    if *CFG_SKILL_REQUIRES_OBJECT <> 1
+        return
+
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #CHARID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [INICIADOR] objeto equipado
+        set *skillObjectID #FINDID
+        return
+    }
+
+    finditem *CFG_SKILL_OBJECT_TYPE C_ , #BACKPACKID
+
+    if #FINDKIND <> -1
+    {
+        Event SysMessage [INICIADOR] objeto en mochila
+        set *skillObjectID #FINDID
+
+        if *CFG_SKILL_OBJECT_EQUIPABLE = 1
+        {
+            set #LOBJECTID *skillObjectID
+            event macro 17 0
+            wait 7
+            Event SysMessage [INICIADOR] objeto equipado
+        }
+
+        return
+    }
+
+    Event SysMessage [INICIADOR] seleccionar objeto manual
+
+    set #LOBJECTID YC
+
+    repeat
+        wait 5
+    until #LOBJECTID <> YC
+
+    set *CFG_SKILL_OBJECT_TYPE #LOBJECTTYPE
+    set *skillObjectID #LOBJECTID
+
+    Event SysMessage [INICIADOR] objeto registrado
+
+return
+
+
+; ============================================================
+; IGNORE LIST INIT
+; ============================================================
+
+sub InitAnimalsIgnoreList
+
+    if *ANIMALS_IGNORED_LIST = ""
+        return
+
+    if *DEBUGMODE = 1
+        Event SysMessage [IGNORE] aplicando lista
+
+    ignoreitem *ANIMALS_IGNORED_LIST 1
+
+return
+
+
+; ============================================================
+; CALL SCRIPT UTILITY
+; ============================================================
+
+sub callScriptWithParams
+    ; %1 = script
+
+    set %scriptFile %1
+    set *param0 %0 - 1
+
+    for %callScriptWithParams_i 1 6
+        set *param . %callScriptWithParams_i ""
+
+    if *param0 > 0
+    {
+        for %callScriptWithParams_i 2 %0
+        {
+            set %callScriptWithParams_j %callScriptWithParams_i - 1
+
+            if %callScriptWithParams_i = 2
+                set *param . %callScriptWithParams_j %2
+            if %callScriptWithParams_i = 3
+                set *param . %callScriptWithParams_j %3
+            if %callScriptWithParams_i = 4
+                set *param . %callScriptWithParams_j %4
+            if %callScriptWithParams_i = 5
+                set *param . %callScriptWithParams_j %5
+            if %callScriptWithParams_i = 6
+                set *param . %callScriptWithParams_j %6
+        }
+    }
+
+    call %scriptFile
+return
